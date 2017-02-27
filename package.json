@@ -1,0 +1,24 @@
+{
+  "name": "agility_deployment",
+  "version": "1.0.0",
+  "description": "How long takes you project to go production?",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bruno1cruz/agility_deployment.git"
+  },
+  "keywords": [
+    "agility",
+    "deployment",
+    "metrics"
+  ],
+  "author": "Bruno1Cruz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bruno1cruz/agility_deployment/issues"
+  },
+  "homepage": "https://github.com/bruno1cruz/agility_deployment#readme"
+}
