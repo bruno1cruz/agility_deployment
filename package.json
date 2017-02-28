@@ -20,5 +20,12 @@
   "bugs": {
     "url": "https://github.com/bruno1cruz/agility_deployment/issues"
   },
-  "homepage": "https://github.com/bruno1cruz/agility_deployment#readme"
+  "homepage": "https://github.com/bruno1cruz/agility_deployment#readme",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "client-oauth2": "^3.4.1",
+    "express": "^4.14.1",
+    "express-load": "^1.1.15",
+    "promise": "^7.1.1"
+  }
 }
