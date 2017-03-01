@@ -1,9 +1,11 @@
+var moment = require("moment");
+
 module.exports = function(app) {
     
     var Schema = require('mongoose').Schema;
     var db = app.database.connection;
 
-    var comment = Schema({
+    var commit = Schema({
         hash:    {type: String},
         author:  {type:String},
         message: {type:String},
@@ -16,9 +18,23 @@ module.exports = function(app) {
         created: {type:Date,default:Date.now},
         environment: {type: String},
         application: {type: String},
-        commits:     {type: [comment]}
-    }, { versionKey: false, collection : "release" });
+        commits:     {type: [commit]}
+    }, { versionKey: false, collection : "release", toObject: { virtuals: true }, toJSON: { virtuals: true } } );
 
+
+    release.virtual("diff").get(function(){
+    
+        var difference = 0;
+
+        for ( var i = 0; i < this.commits.length; i++){
+            var reference = moment(this.created);
+            var created = moment(this.commits[i].created);
+
+            difference+= reference.diff(created);
+        }
+
+        return difference / this.commits.length;
+    });
 
     return db.model('release', release);
 };

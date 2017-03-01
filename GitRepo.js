@@ -2,7 +2,10 @@ var Promise = require('promise');
 var request = require("request");
 var ClientOAuth2 = require('client-oauth2')
 
-function GitRepo(){
+function GitRepo(repository_owner, repository_slug){
+
+	this.repository_owner = repository_owner;
+	this.repository_slug = repository_slug;
 	 
 	var oauthClient = new ClientOAuth2({
 	  clientId: '',
@@ -33,9 +36,8 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 	return new Promise(function(resolve,reject){
 
 		promise_token.then(function(token){
-
 			request({
-				uri: "https://api.bitbucket.org/2.0/repositories/",
+				uri: "https://api.bitbucket.org/2.0/repositories/"+this.repository_owner+"/"+this.repository_slug+"/commits/"+reference_to+"?exclude="+reference_from,
 				headers:{
 					"Authorization":"Bearer " + token
 				}
