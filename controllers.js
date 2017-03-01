@@ -7,11 +7,30 @@ module.exports = function(app){
 		release:{
 			post: function(req,res){
 
-				var release = "master";
-				var last_release = "feature/property-and-offer";
+				var body = req.body;
 
-				new GitRepo().commits(release, last_release).then(function(commits){
-					res.json(commits)
+				var release = new app.models.Release();
+
+				release.application = req.params.app_name;
+				release.environment = body.environment;
+				release.compare = "recorrencia-6.5.0";
+				release.name = body.name;
+
+				new GitRepo().commits(release.name, release.compare).then(function(commits){
+
+					release.commits = commits;
+
+					release.save(function(err){
+
+						if (err){
+							console.error(err);
+							res.end();
+							return;
+						}
+
+						res.json(release);
+					})
+
 				})
 
 			}

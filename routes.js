@@ -1,5 +1,5 @@
 module.exports = function(app) {
 
-	app.get("/releases", app.controllers.release.post);
+	app.post("/apps/:app_name/releases", app.controllers.release.post);
 
 };

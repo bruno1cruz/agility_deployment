@@ -25,7 +25,7 @@ GitRepo.prototype.token = function(){
 }
 
 
-GitRepo.prototype.commits = function(){
+GitRepo.prototype.commits = function(reference_to,reference_from){
 
 	var promise_token = this.token();
 
@@ -58,7 +58,7 @@ GitRepo._parse_commits = function(body){
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
 	  var _commit = _commits[i];
-	  commits.push({ "hash": _commit.hash, "date": _commit.date, "author": _commit.author.user.username });
+	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author.user.username, "message": _commit.message });
 	}
 
 	return commits;
