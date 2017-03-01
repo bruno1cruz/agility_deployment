@@ -24,16 +24,41 @@ module.exports = function(app){
 
 						if (err){
 							console.error(err);
+							res.status(400);
 							res.end();
 							return;
 						}
-
+						
+						res.status(201);
 						res.json(release);
 					})
 
 				})
 
 			}
+		},
+		application:{
+
+			post: function(req,res){
+
+				var body = req.body;
+				var application = new app.models.Application(body);
+
+				application.save(function(err,app){
+					if (err){
+							console.error(err);
+							res.status(400);
+							res.end();
+							return;
+						}
+						
+						res.status(201);
+						res.location("/apps/" + apps.name);
+				})
+
+
+			}
+
 		}
 	}
 
