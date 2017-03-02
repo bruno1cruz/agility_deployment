@@ -1,5 +1,6 @@
 
-var GitRepo = require('./GitRepo.js');
+var GitRepo = require("./GitRepo.js");
+var Promise = require("promise");
 
 module.exports = function(app){
 
@@ -13,27 +14,32 @@ module.exports = function(app){
 
 				release.application = req.params.app_name;
 				release.environment = body.environment;
-				release.compare = "recorrencia-6.5.0";
 				release.name = body.name;
 
-				new GitRepo().commits(release.name, release.compare).then(function(commits){
+				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
 
-					release.commits = commits;
 
-					release.save(function(err){
+					if (!application) {
+						throw new Error("application " + release.application+" not found");
+					}
 
-						if (err){
-							console.error(err);
-							res.status(400);
-							res.end();
-							return;
-						}
-						
-						res.status(201);
-						res.json(release);
-					})
+					application.lastRelease().then(function(lastRelease){
 
-				})
+						release.compare = lastRelease;
+
+						new GitRepo( application.repository.owner ,application.repository.name).commits(release.name, release.compare).then(function(commits){
+
+							release.commits = commits;
+
+							release.save().then(function(release){
+								res.status(201);
+								res.json(release);
+							}, err => errorHandler(err,res));
+
+						}, err => errorHandler(err,res));
+					},err => errorHandler(err,res));
+
+				}).catch(err => errorHandler(err,res));
 
 			},
 			get: function(req,res){
@@ -55,14 +61,14 @@ module.exports = function(app){
 
 				application.save(function(err,app){
 					if (err){
-							console.error(err);
-							res.status(400);
-							res.end();
-							return;
-						}
+						console.error(err);
+						res.status(400);
+						res.end();
+						return;
+					}
 						
-						res.status(201);
-						res.location("/apps/" + apps.name);
+					res.status(201);
+					res.location("/apps/" + app.name);
 				})
 
 
@@ -71,4 +77,12 @@ module.exports = function(app){
 		}
 	}
 
+}
+
+function errorHandler(err, response, statusCode){
+	statusCode = statusCode || 500;
+	console.error(err);
+	response.status(statusCode);
+	var message = err instanceof Error ? err.message : err
+	response.json({"message" : message});
 }
