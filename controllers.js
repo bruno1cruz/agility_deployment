@@ -66,9 +66,10 @@ module.exports = function(app){
 						res.end();
 						return;
 					}
-						
+
 					res.status(201);
 					res.location("/apps/" + app.name);
+					res.end();
 				})
 
 

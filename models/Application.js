@@ -11,8 +11,7 @@ module.exports = function(app) {
         repository: {
         	owner: {type: String},
         	name: {type: String}
-        },
-        created:    {type:Date,default:Date.now}
+        }
     }, { versionKey: false, collection : "application" });
 
     application.methods.lastRelease = function(){
