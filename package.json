@@ -28,6 +28,7 @@
     "express-load": "^1.1.15",
     "moment": "^2.17.1",
     "mongoose": "^4.8.5",
-    "promise": "^7.1.1"
+    "promise": "^7.1.1",
+    "request": "^2.79.0"
   }
 }

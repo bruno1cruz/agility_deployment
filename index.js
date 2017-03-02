@@ -9,10 +9,9 @@ mongoose.Promise = require('promise');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.database= { connection : mongoose.connect("mongodb://localhost/agility") };
+app.database= { connection : mongoose.connect("mongodb://localhost:9000/agility") };
 
 load("models").then("controllers").then('routes').into(app);
-
 
 app.listen(7000, function(){
 	console.info("=== >> Agility Deployment is up and running");

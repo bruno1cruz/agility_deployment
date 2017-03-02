@@ -12,19 +12,18 @@ function GitRepo(repositoryOwner, repositoryName){
 	this.repositoryName = repositoryName;
 	 
 	var oauthClient = new ClientOAuth2({
-	  clientId: '',
-	  clientSecret: '',
+	  clientId: process.env.CLIENT_ID,
+	  clientSecret: process.env.CLIENT_SECRET,
 	  accessTokenUri: 'https://bitbucket.org/site/oauth2/access_token'
 	});
 
 	this._oauthClient= oauthClient;
-
 }
 	
 
 GitRepo.prototype.token = function(){
 
-	var token = this._oauthClient.createToken("banana","");
+	var token = this._oauthClient.createToken("banana", process.env.REFRESH_TOKEN );
 
 	return new Promise(function(resolve, reject){
 		token.refresh().then(function(data){ resolve(data.accessToken);}, reject);
