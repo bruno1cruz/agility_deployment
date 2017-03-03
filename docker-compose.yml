@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "9000:27017"
+
+  agility:
+    image: bruno1cruz/agility_deployment:latest
+    container_name: agility
+    environment:
+      CLIENT_ID: 
+      CLIENT_SECRET: 
+      REFRESH_TOKEN: 
+      MONGODB: mongodb://mongodb/agility
+    links:
+      - mongodb
+    ports:
+      - "7000:7000"

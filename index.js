@@ -9,7 +9,7 @@ mongoose.Promise = require('promise');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.database= { connection : mongoose.connect("mongodb://localhost:9000/agility") };
+app.database= { connection : mongoose.connect(process.env.MONGODB) };
 
 load("models").then("controllers").then('routes').into(app);
 
