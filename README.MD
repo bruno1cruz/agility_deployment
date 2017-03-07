@@ -1,5 +1,9 @@
 # Agility
 
+## Documentation
+Use http://editor.swagger.io
+[API documentation](api.yaml)
+
 
 ## Bitbucket
 ### Create oauth configuration

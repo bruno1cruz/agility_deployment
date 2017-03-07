@@ -1,0 +1,104 @@
+swagger: "2.0"
+
+info:
+  description: register your releases and see how long it takes your commits to go production
+  version: "1.0.0"
+  title: Agility
+  contact:
+    name: Bruno Cruz
+    email: brunolimacruz@gmail.com
+
+basePath: /
+
+schemes:
+  - http
+
+paths:
+
+  /apps:
+    post:
+      summary: create an application so you can register your releases
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: application
+          required: true
+          schema:
+            $ref: "#/definitions/Application"
+      responses:
+        "201":
+          description: Application created
+
+  /apps/{app_id}/releases:
+    post:
+      summary: creates a release
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+        - name: release
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Release"
+      responses:
+        201:
+          description: Release created
+    
+    get:
+      summary: list releases from an application
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: releases with difference
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Release'
+
+definitions:
+
+  Application:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Application name
+      milesone:
+        type: string
+        description: Tag name or commit hash that will be used for the first reference
+      repository:
+        type: object
+        description: git repository information(must have read permission)
+        properties:
+          name:
+            type: string
+          owner:
+            type: string
+            description: Repository's owner
+  
+  Release:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Releases' name, it has to be a tag our commit hash
+      environment:
+        type: string
+        description: Environment where the release happened
+      diff:
+        type: integer
+        format: int32
+        description: Difference from the previous release(milliseconds)
