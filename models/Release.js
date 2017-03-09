@@ -9,11 +9,15 @@ module.exports = function(app) {
         hash:    {type: String},
         author:  {type:String},
         message: {type:String},
-        created: {type:Date}
+        created: {type:Date},
+        diff:{
+            additions: {type: Number},
+            deletions: {type: Number}
+        }
     },{_id :false});
     
     var release = Schema({
-        name: 		 {type: String},
+        name:        {type: String},
         compare:     {type: String},
         created: {type:Date,default:Date.now},
         environment: {type: String},
@@ -25,15 +29,19 @@ module.exports = function(app) {
     release.virtual("diff").get(function(){
     
         var difference = 0;
+        var additions = 0;
+        var deletions = 0;
 
         for ( var i = 0; i < this.commits.length; i++){
             var reference = moment(this.created);
             var created = moment(this.commits[i].created);
 
             difference+= reference.diff(created);
+
         }
 
-        return difference / this.commits.length;
+        var miliseconds = difference / this.commits.length
+        return {miliseconds:miliseconds};
     });
 
     return db.model('release', release);
