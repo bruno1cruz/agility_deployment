@@ -6,6 +6,10 @@ Use http://editor.swagger.io
 
 
 ## Bitbucket
+
+### API
+https://developer.atlassian.com/bitbucket/api/2/reference/resource/repositories
+
 ### Create oauth configuration
 Go to Bitbucket Settings > OAuth > Add Consumer
 After creation save both key and secret 

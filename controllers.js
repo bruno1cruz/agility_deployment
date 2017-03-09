@@ -27,7 +27,9 @@ module.exports = function(app){
 
 						release.compare = lastRelease;
 
-						new GitRepo( application.repository.owner ,application.repository.name).commits(release.name, release.compare).then(function(commits){
+						var gitRepo = new GitRepo( application.repository.owner ,application.repository.name);
+
+						gitRepo.commits(release.name, release.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
 
 							release.commits = commits;
 
