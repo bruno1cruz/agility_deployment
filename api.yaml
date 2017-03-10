@@ -99,6 +99,17 @@ definitions:
         type: string
         description: Environment where the release happened
       diff:
-        type: integer
-        format: int32
-        description: Difference from the previous release(milliseconds)
+        type: object
+        properties:
+          milliseconds:
+            type: integer
+            format: int32
+            description: Difference from the previous release(milliseconds)
+          additions:
+            type: integer
+            format: int32
+            description: Lines added in this release
+          deletions:
+            type: integer
+            format: int32
+            description: Lines removed in this release

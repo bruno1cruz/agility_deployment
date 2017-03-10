@@ -7,6 +7,13 @@ services:
     ports:
       - "9000:27017"
 
+  dashboard:
+      image: metabase/metabase
+      ports: 
+        - "3000:3000"
+      links:
+        - mongodb
+
   agility:
     image: bruno1cruz/agility_deployment:latest
     container_name: agility
