@@ -1,0 +1,28 @@
+{
+  "name": "agility_deployment",
+  "description": "How long takes you project to go production?",
+  "main": "index.js",
+  "authors": [
+    "Bruno1Cruz"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "agility",
+    "deployment",
+    "metrics"
+  ],
+  "homepage": "https://github.com/bruno1cruz/agility_deployment",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "highcharts": "^5.0.9",
+    "jquery": "^3.1.1",
+    "bootstrap": "^3.3.7"
+  }
+}

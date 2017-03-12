@@ -8,7 +8,7 @@ info:
     name: Bruno Cruz
     email: brunolimacruz@gmail.com
 
-basePath: /
+basePath: /api/ 
 
 schemes:
   - http
@@ -76,7 +76,7 @@ definitions:
       name:
         type: string
         description: Application name
-      milesone:
+      milestone:
         type: string
         description: Tag name or commit hash that will be used for the first reference
       repository:
@@ -88,7 +88,7 @@ definitions:
           owner:
             type: string
             description: Repository's owner
-  
+
   Release:
     type: object
     properties:

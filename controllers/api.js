@@ -1,5 +1,5 @@
 
-var GitRepo = require("./GitRepo.js");
+var GitRepo = require("../GitRepo.js");
 var Promise = require("promise");
 
 module.exports = function(app){
