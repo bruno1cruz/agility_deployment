@@ -6,9 +6,12 @@ WORKDIR /app
 
 COPY . /app
 
-RUN npm install bower
+#RUN npm install -g bower
 RUN npm install
-RUN bower install
+
+#RUN echo '{ "allow_root": true }' > /root/.bowerrc
+
+#RUN bower install
 
 EXPOSE 7000
 
