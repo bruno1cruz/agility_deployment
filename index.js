@@ -4,6 +4,12 @@ var load = require('express-load');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
+// app.use(express.static(__dirname + '/public', 3600000));
+app.use(express.static(__dirname + '/bower_components'));
+
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
 mongoose.Promise = require('promise');
 
 app.use(bodyParser.json());

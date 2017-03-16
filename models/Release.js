@@ -22,12 +22,15 @@ module.exports = function(app) {
         created: {type:Date,default:Date.now},
         environment: {type: String},
         application: {type: String},
-        commits:     {type: [commit]}
-    }, { versionKey: false, collection : "release", toObject: { virtuals: true }, toJSON: { virtuals: true } } );
+        commits:     {type: [commit], select: false},
+        diff:{
+            additions: {type: Number},
+            deletions: {type: Number},
+            miliseconds: {type: Number}
+        }
+    }, { versionKey: false, collection : "release", toObject: { virtuals: true }, toJSON: { virtuals: true, commits: false } } );
 
-
-    release.virtual("diff").get(function(){
-    
+    release.pre('save', true, function(next, done) {
         var difference = 0;
         var additions = 0;
         var deletions = 0;
@@ -38,10 +41,19 @@ module.exports = function(app) {
 
             difference+= reference.diff(created);
 
+            if ( this.commits[i].diff ){
+                additions+= this.commits[i].diff.additions;
+                deletions+= this.commits[i].diff.deletions;
+            }
+
         }
 
         var miliseconds = difference / this.commits.length
-        return {miliseconds:miliseconds};
+        
+        this.diff = {miliseconds:miliseconds, deletions : deletions, additions:additions };
+
+        next();
+        done();
     });
 
     return db.model('release', release);

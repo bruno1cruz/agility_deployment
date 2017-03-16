@@ -1,5 +1,5 @@
 
-var GitRepo = require("./GitRepo.js");
+var GitRepo = require("../GitRepo.js");
 var Promise = require("promise");
 
 module.exports = function(app){
@@ -48,7 +48,7 @@ module.exports = function(app){
 
 				var application = req.params.app_name;
 
-				app.models.Release.find({application:application},{_id:false }, {sort:{_id:-1}},function(err, releases){
+				app.models.Release.find({application:application},{_id:false,commits:false }, {sort:{_id:-1}},function(err, releases){
 	                res.json(releases);
 	            });
 
