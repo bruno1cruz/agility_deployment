@@ -14,13 +14,15 @@ module.exports = function(app){
 
 				release.application = req.params.app_name;
 				release.environment = body.environment;
+				release.reference = body.reference;
 				release.name = body.name;
 
 				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
 
 
 					if (!application) {
-						throw new Error("application " + release.application+" not found");
+						errorHandler("application " + release.application+" not found", res, 404);
+						return;
 					}
 
 					application.lastRelease().then(function(lastRelease){
@@ -48,7 +50,7 @@ module.exports = function(app){
 
 				var application = req.params.app_name;
 
-				app.models.Release.find({application:application},{_id:false,commits:false }, {sort:{_id:-1}},function(err, releases){
+				app.models.Release.find({application:application},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
 	                res.json(releases);
 	            });
 

@@ -47,7 +47,14 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 	var that = this;
 
 	return new Promise(function(resolve,reject){
-		that._request(uri).then(body=>resolve(GitRepo._parse_commits(body)),reject);
+		that._request(uri).then(function(body){
+			var commits = GitRepo._parse_commits(body);
+			if (commits.length===0){
+				reject("no commit found for this release");
+			} else {
+				resolve(commits)
+			}	
+		},reject).catch(reject);
 	});
 }
 
@@ -67,9 +74,10 @@ GitRepo.prototype._request = function(uri){
 				headers:{
 					"Authorization":"Bearer " + token
 				}
-			},function(error, response, body){				
+			},function(error, response, body){
+				
 				if (error) {
-					reject(error) 
+					reject(error);					
 				} else {
 					resolve(body);
 				}
@@ -81,6 +89,8 @@ GitRepo.prototype._request = function(uri){
 }
 
 GitRepo.prototype.withDiff = function(commits){
+
+	console.log("calculating diff for %s commits", commits.length)
 
 	var that = this;
 
@@ -126,7 +136,13 @@ GitRepo._parse_diff = function(diff){
 
 GitRepo._parse_commits = function(body){
 
-	var _commits = JSON.parse(body).values;
+	body = JSON.parse(body);
+
+	if (body.type === "error"){
+		throw new Error(body.error.message);
+	}
+
+	var _commits = body.values;
 	var commits = [];
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
