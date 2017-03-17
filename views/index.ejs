@@ -8,7 +8,9 @@
 
   	<script src="/jquery/dist/jquery.min.js" type="text/javascript"></script>
   	<script src="/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="/highcharts/highcharts.js"></script>
+    <!-- <script src="/highcharts/highcharts.js"></script> -->
+    <script src="/highcharts/highstock.js"></script>
+    <script src="/moment/moment.js"></script>
     
     <title>How fast can you go</title>
 
@@ -25,6 +27,7 @@
       <tbody></tbody>
       <thead><tr>
         <td>Name</td>
+        <td>Created</td>
         <td>Environment</td>
         <td>Additions</td>
         <td>Deletions</td>
@@ -32,6 +35,7 @@
       </tr></thead>
     </table>
 
+    <div id="frequency_releases"></div>
     <div id="line_releases"></div>
     <div id="diff_releases"></div>
 
@@ -44,6 +48,7 @@
       var minutesSeriesData = [];
       var categories = [];
       var diffGroupSeriesData = {additions:[],deletions:[]}
+      var frequencySeries =[];
 
       for(var i=0;i<data.length;i++){
         var release = data[i];
@@ -51,21 +56,56 @@
         minutesSeriesData.push(release.diff.miliseconds/1000/60/60);
         diffGroupSeriesData.additions.push(release.diff.additions);
         diffGroupSeriesData.deletions.push(release.diff.deletions);
+
+        frequencySeries.push([moment(release.reference.created).valueOf(),1]);
       }
 
       drawTable(data);
       drawLineReleases(categories,minutesSeriesData);
       drawDiffReleases(categories,diffGroupSeriesData);
 
+      drawFrequency(frequencySeries);
+
 
     });
+
+    drawFrequency = function(data){
+      
+      $('#frequency_releases').highcharts('StockChart', {
+        rangeSelector : {
+          selected : 1,
+          enabled:false
+        },
+        title : {
+          text : 'Deployment Frequency'
+        },
+        yAxis: {
+            title: {
+                text: 'Deployments'
+            }
+        },
+        connectNulls:true,
+        series : [{
+          name : 'deployment(s)',
+          data : data,
+          dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [['day',[1]]],
+            smoothed: true
+          }
+        }]
+      });
+
+    }
 
     drawTable = function(releases){
       var releasesTable = $("#releases tbody");
       for( var i=0; i<releases.length; i++ ){
         var release = releases[i];
 
-        var releaseHTML = "<tr><td>"+release.name+"</td><td>"+release.environment+"</td><td>"+release.diff.additions+"</td><td>"+release.diff.deletions+"</td><td>"+release.diff.miliseconds+"</td></tr>";
+        var releaseHTML = "<tr><td>"+release.name+"</td><td>"+moment(release.reference.created).format("D/M/YYYY")+"</td><td>"+release.environment+"</td><td>"+release.diff.additions+"</td><td>"+release.diff.deletions+"</td><td>"+moment.duration(release.diff.miliseconds).humanize();+"</td></tr>";
 
         releasesTable.append(releaseHTML)
       }
@@ -124,13 +164,18 @@
     drawLineReleases = function(categories,seriesData){
       var configuration = {
         title: {
-            text: 'Production Odyssey'
+            text: 'Time to production'
         },
         xAxis: {
             title: {
-                text: 'Time elapsed(minutes)'
+                text: 'Releases'
             },
             categories: categories
+        },
+        yAxis: {
+            title: {
+                text: 'Time in minutes'
+            }
         },
         legend: {
             layout: 'vertical',
@@ -139,7 +184,6 @@
         },
         series: [
           {
-            name:"Releases",
             data:seriesData
           }
         ]
