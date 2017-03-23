@@ -147,7 +147,7 @@ GitRepo._parse_commits = function(body){
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
 	  var _commit = _commits[i];
-	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author.user.username, "message": _commit.message });
+	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message });
 	}
 
 	return commits;

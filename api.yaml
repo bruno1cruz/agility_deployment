@@ -8,7 +8,9 @@ info:
     name: Bruno Cruz
     email: brunolimacruz@gmail.com
 
-basePath: /api/ 
+
+basePath: /api/
+host: localhost:7000
 
 schemes:
   - http

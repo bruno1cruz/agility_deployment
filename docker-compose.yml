@@ -11,11 +11,16 @@ services:
     image: bruno1cruz/agility_deployment:latest
     container_name: agility
     environment:
-      CLIENT_ID: 
-      CLIENT_SECRET: 
-      REFRESH_TOKEN: 
+      CLIENT_ID: KpN7U4v98bAdfubcCF
+      CLIENT_SECRET: rgw63Qb2uQbqJzHnTYmBfuzGunTvbyQR
+      REFRESH_TOKEN: PMtJESnSGaxmXgAmcy
       MONGODB: mongodb://mongodb/agility
     links:
       - mongodb
     ports:
       - "7000:7000"
+
+  swagger:
+    image: swaggerapi/swagger-editor
+    ports: 
+      - "7001:8080"

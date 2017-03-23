@@ -11,8 +11,6 @@ RUN npm install
 
 #RUN echo '{ "allow_root": true }' > /root/.bowerrc
 
-#RUN bower install
-
 EXPOSE 7000
 
 CMD [ "npm", "start" ]
