@@ -4,6 +4,9 @@ var load = require('express-load');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
+app.use(require('cors')());
+
+
 // app.use(express.static(__dirname + '/public', 3600000));
 app.use(express.static(__dirname + '/bower_components'));
 

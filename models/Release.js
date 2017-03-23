@@ -1,4 +1,5 @@
 var moment = require("moment");
+var stats = require("stats-lite");
 
 module.exports = function(app) {
     
@@ -29,14 +30,16 @@ module.exports = function(app) {
         application: {type: String},
         commits:     {type: [commit], select: false},
         diff:{
-            additions:   {type: Number},
-            deletions:   {type: Number},
-            miliseconds: {type: Number}
+            additions:     {type: Number},
+            deletions:     {type: Number},
+            miliseconds:   {type: Number},
+            percentile_95: {type: Number},
+            size:          {type: Number}
         }
     }, { versionKey: false, collection : "release", toObject: { virtuals: true }, toJSON: { virtuals: true, commits: false } } );
 
     release.pre('save', true, function(next, done) {
-        var difference = 0;
+        var differences = [];
         var additions = 0;
         var deletions = 0;
 
@@ -45,7 +48,7 @@ module.exports = function(app) {
         } else {
             var firstCommit = this.commits[0];
             this.reference.created = firstCommit.created;
-            console.log("using first commit creation as deployment reference [%s] %s %s", firstCommit.hash, firstCommit.message, firstCommit.created);
+            console.log("using last commit creation as deployment reference [%s] %s %s", firstCommit.hash, firstCommit.message, firstCommit.created);
         }
 
         var reference = moment(this.reference.created);
@@ -58,12 +61,16 @@ module.exports = function(app) {
             
             additions+= this.commits[i].diff.additions;
             deletions+= this.commits[i].diff.deletions;
-            difference+= commitDifference;
+            differences.push(commitDifference);
         }
-
-        var miliseconds = difference / this.commits.length
         
-        this.diff = {miliseconds:miliseconds, deletions : deletions, additions:additions };
+        this.diff = {
+                miliseconds: stats.mean(differences), 
+                deletions : deletions, 
+                additions:additions,
+                percentile_95: stats.percentile(differences,0.95),
+                size: this.commits.length
+        };
 
         next();
         done();
