@@ -28,7 +28,7 @@ module.exports = function(app) {
         },
         environment: {type: String},
         application: {type: String},
-        commits:     {type: [commit], select: false},
+        commits:     {type: [commit]},
         diff:{
             additions:     {type: Number},
             deletions:     {type: Number},
