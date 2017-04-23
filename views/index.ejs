@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+
+  	<script src="/jquery/dist/jquery.min.js" type="text/javascript"></script>
+  	<script src="/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/highcharts/highstock.js"></script>
+    <script src="/moment/moment.js"></script>
+    
+    <title>How fast can you go</title>
+
+</head>
+
+<body>
+
+  <div class="containes">
+
+    <h1>Application: <%=application%></h1>
+
+    <h2>Releases</h2>
+    <table id="releases" class="table table-striped">
+      <tbody></tbody>
+      <thead><tr>
+        <td>Name</td>
+        <td>Created</td>
+        <td>Environment</td>
+        <td>Additions</td>
+        <td>Deletions</td>
+        <td>Commits</td>
+        <td>Percentile 95%</td>
+        <td>Time Elapsed</td>
+      </tr></thead>
+    </table>
+
+    <div id="frequency_releases"></div>
+    <div id="line_releases"></div>
+    <div id="diff_releases"></div>
+
+  </div>
+
+	<script type="text/javascript">
+
+    $.getJSON( "/api/apps/<%=application%>/releases", function( data ) {
+
+      var minutesSeriesData = [], minutesPercentile95SeriesData=[];
+      var categories = [];
+      var diffGroupSeriesData = {additions:[],deletions:[],commits:[]}
+      var frequencySeries =[];
+
+      for(var i=0;i<data.length;i++){
+        var release = data[i];
+        categories.push(release.name)
+        minutesSeriesData.push(release.diff.miliseconds/1000/60);
+        minutesPercentile95SeriesData.push(release.diff.percentile_95/1000/60);
+        diffGroupSeriesData.additions.push(release.diff.additions);
+        diffGroupSeriesData.deletions.push(release.diff.deletions);
+        diffGroupSeriesData.commits.push(release.diff.size||0);
+
+        frequencySeries.push([moment(release.reference.created).valueOf(),1]);
+      }
+
+      drawTable(data);
+      drawLineReleases(categories,minutesSeriesData,minutesPercentile95SeriesData);
+      drawDiffReleases(categories,diffGroupSeriesData);
+
+      drawFrequency(frequencySeries);
+
+
+    });
+
+    drawFrequency = function(data){
+      
+      $('#frequency_releases').highcharts('StockChart', {
+        rangeSelector : {
+          selected : 1,
+          enabled:false
+        },
+        title : {
+          text : 'Deployment Frequency'
+        },
+        yAxis: {
+            title: {
+                text: 'Deployments'
+            }
+        },
+        connectNulls:true,
+        series : [{
+          name : 'deployment(s)',
+          data : data,
+          dataGrouping: {
+            approximation: "sum",
+            enabled: true,
+            forced: true,
+            units: [['week',[1]]],
+            smoothed: true
+          }
+        }]
+      });
+
+    }
+
+    drawTable = function(releases){
+      var releasesTable = $("#releases tbody");
+      for( var i=0; i<releases.length; i++ ){
+        var release = releases[i];
+
+        var releaseHTML = "<tr>"+
+                          "<td>"+release.name+"</td>"+
+                          "<td>"+moment(release.reference.created).format("D/M/YYYY")+"</td>"+
+                          "<td>"+release.environment+"</td>"+
+                          "<td>"+release.diff.additions+"</td>"+
+                          "<td>"+release.diff.deletions+"</td>"+
+                          "<td>"+release.diff.size+"</td>"+
+                          "<td>"+(release.diff.percentile_95?moment.duration(release.diff.percentile_95).humanize():"none")+"</td>"+
+                          "<td>"+moment.duration(release.diff.miliseconds).humanize();+"</td>"+
+                          "</tr>";
+
+        releasesTable.append(releaseHTML)
+      }
+    }
+
+    drawDiffReleases = function(categories,diffGroupSeriesData){
+
+      Highcharts.chart('diff_releases', {
+          chart: {
+              zoomType: 'xy'
+          },
+          title: {
+              text: 'Releases Size'
+          },
+          xAxis: {
+              categories: categories,
+              tickmarkPlacement: 'on',
+              crosshair: true,
+              title: {
+                  enabled: false
+              }
+          },
+          yAxis: [{
+              title: {
+                  text: 'Lines modified'
+              },
+              labels: {
+                  formatter: function () {
+                      return this.value;
+                  }
+              }
+          },
+          {
+              title: {
+                  text: 'commits'
+              },
+              opposite:true
+          }],
+          tooltip: {
+              shared: true
+          },
+          plotOptions: {
+              area: {
+                  stacking: 'normal',
+                  lineColor: '#666666',
+                  lineWidth: 1,
+                  marker: {
+                      lineWidth: 1,
+                      lineColor: '#666666'
+                  }
+              }
+          },
+          series: [
+            {name: "Additions", data: diffGroupSeriesData.additions, type: 'area', tooltip:{valueSuffix: ' lines'}},
+            {name: "Deletions", data: diffGroupSeriesData.deletions, type: 'area', tooltip:{valueSuffix: ' lines'}},
+            {name: "Commits", data: diffGroupSeriesData.commits, type:"spline",yAxis: 1}
+          ]
+      });
+
+    }
+
+    drawLineReleases = function(categories,meanSeriesData,percentile95SeriesData){
+      var configuration = {
+        title: {
+            text: 'Time to production'
+        },
+        xAxis: {
+            title: {
+                text: 'Releases'
+            },
+            categories: categories
+        },
+        yAxis: {
+            title: {
+                text: 'Time in minutes'
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle'
+        },
+        series: [
+          {
+            data:meanSeriesData,
+            name:"Mean"
+          },
+          {
+            data:percentile95SeriesData,
+            name:"Percentile 95%"
+          }
+        ]
+      };
+
+      Highcharts.chart('line_releases', configuration);
+    }
+
+
+
+	</script>
+
+  </body>
+</html>

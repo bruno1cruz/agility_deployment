@@ -1,2 +1,5 @@
 node_modules
+#bower_components
 npm-debug.log
+docker-compose.yml
+Makefile

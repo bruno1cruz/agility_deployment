@@ -1,5 +1,5 @@
 
-var GitRepo = require("./GitRepo.js");
+var GitRepo = require("../GitRepo.js");
 var Promise = require("promise");
 
 module.exports = function(app){
@@ -14,13 +14,15 @@ module.exports = function(app){
 
 				release.application = req.params.app_name;
 				release.environment = body.environment;
+				release.reference = body.reference;
 				release.name = body.name;
 
 				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
 
 
 					if (!application) {
-						throw new Error("application " + release.application+" not found");
+						errorHandler("application " + release.application+" not found", res, 404);
+						return;
 					}
 
 					application.lastRelease().then(function(lastRelease){
@@ -48,11 +50,36 @@ module.exports = function(app){
 
 				var application = req.params.app_name;
 
-				app.models.Release.find({application:application},{_id:false }, {sort:{_id:-1}},function(err, releases){
+				app.models.Release.find({application:application},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
 	                res.json(releases);
 	            });
 
 			},
+		},
+		refresh:{
+			get: function(req,res){
+
+				app.models.Application.findOne({name: req.params.app_name},{_id:false }).then(function(application){
+
+
+					if (!application) {
+						errorHandler("application " + req.params.app_name +" not found", res, 404);
+						return;
+					}
+
+					app.models.Release.find({application:req.params.app_name},function(err, releases){
+	                	for (var i = 0; i < releases.length; i++){
+	                		releases[i].save();
+	                		console.log("release " + releases[i].name + " refreshed");
+	                	}
+	            	});
+
+					res.status(202);
+					res.end();
+
+				}).catch(err => errorHandler(err,res));
+
+			}
 		},
 		application:{
 

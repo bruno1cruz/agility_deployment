@@ -19,3 +19,8 @@ services:
       - mongodb
     ports:
       - "7000:7000"
+
+  swagger:
+    image: swaggerapi/swagger-editor
+    ports: 
+      - "7001:8080"

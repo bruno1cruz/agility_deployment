@@ -8,7 +8,8 @@ info:
     name: Bruno Cruz
     email: brunolimacruz@gmail.com
 
-basePath: /
+basePath: /api/
+host: localhost:7000
 
 schemes:
   - http
@@ -76,7 +77,7 @@ definitions:
       name:
         type: string
         description: Application name
-      milesone:
+      milestone:
         type: string
         description: Tag name or commit hash that will be used for the first reference
       repository:
@@ -88,7 +89,7 @@ definitions:
           owner:
             type: string
             description: Repository's owner
-  
+
   Release:
     type: object
     properties:
@@ -99,6 +100,17 @@ definitions:
         type: string
         description: Environment where the release happened
       diff:
-        type: integer
-        format: int32
-        description: Difference from the previous release(milliseconds)
+        type: object
+        properties:
+          milliseconds:
+            type: integer
+            format: int32
+            description: Difference from the previous release(milliseconds)
+          additions:
+            type: integer
+            format: int32
+            description: Lines added in this release
+          deletions:
+            type: integer
+            format: int32
+            description: Lines removed in this release
