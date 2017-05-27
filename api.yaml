@@ -11,6 +11,11 @@ info:
 basePath: /api/
 host: localhost:7000
 
+consumes:
+  - application/json
+produces:
+  - application/json
+
 schemes:
   - http
 
@@ -19,10 +24,6 @@ paths:
   /apps:
     post:
       summary: create an application so you can register your releases
-      consumes:
-        - application/json
-      produces:
-        - application/json
       parameters:
         - in: body
           name: application
@@ -33,13 +34,26 @@ paths:
         "201":
           description: Application created
 
+  /apps/{app_id}/teams:
+    post:
+      summary: team to get things done
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+        - name: team
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Team'
+      responses:
+        201:
+          description: Team added
+          
   /apps/{app_id}/releases:
     post:
       summary: creates a release
-      consumes:
-        - application/json
-      produces:
-        - application/json
       parameters:
         - name: app_id
           in: path
@@ -49,7 +63,7 @@ paths:
           in: body
           required: true
           schema:
-            $ref: "#/definitions/Release"
+            $ref: '#/definitions/ReleaseNew'
       responses:
         201:
           description: Release created
@@ -67,7 +81,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Release'
+              $ref: '#/definitions/ReleaseList'
 
 definitions:
 
@@ -90,7 +104,7 @@ definitions:
             type: string
             description: Repository's owner
 
-  Release:
+  ReleaseList:
     type: object
     properties:
       name:
@@ -99,6 +113,12 @@ definitions:
       environment:
         type: string
         description: Environment where the release happened
+      reference:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [build, git]
       diff:
         type: object
         properties:
@@ -106,6 +126,13 @@ definitions:
             type: integer
             format: int32
             description: Difference from the previous release(milliseconds)
+          percentile_95:
+            type: integer
+            format: int32
+          size:
+            type: integer
+            format: int32
+            description: Amount of commits
           additions:
             type: integer
             format: int32
@@ -114,3 +141,31 @@ definitions:
             type: integer
             format: int32
             description: Lines removed in this release
+
+  ReleaseNew:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Releases' name, it has to be a tag our commit hash
+      environment:
+        type: string
+        description: Environment where the release happened
+        example: production
+      reference:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [build, git]
+            
+  Team:
+    type: object
+    properties:
+      amount:
+        type: integer
+        format: int32
+      since:
+        type: string
+        format: date
+        example: "2000-12-31"
