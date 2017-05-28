@@ -61,7 +61,6 @@ module.exports = function(app){
 
 				app.models.Application.findOne({name: req.params.app_name},{_id:false }).then(function(application){
 
-
 					if (!application) {
 						errorHandler("application " + req.params.app_name +" not found", res, 404);
 						return;
@@ -95,7 +94,7 @@ module.exports = function(app){
 						res.end();
 						return;
 					}
-
+					console.log("Application %s created", app.name)
 					res.status(201);
 					res.location("/apps/" + app.name);
 					res.end();
@@ -104,6 +103,36 @@ module.exports = function(app){
 
 			}
 
+		},
+		team:{
+			post: function(req,res){
+				var team = new app.models.Team(req.body);
+				team.application = req.params.app_name;				
+
+				app.models.Application.findOne({name: team.application},{_id:false }).then(function(application){
+
+					if (!application) {
+						errorHandler("application " + req.params.app_name +" not found", res, 404);
+						return;
+					}
+
+					team.save(function(err){
+
+						if (err){
+							console.error(err);
+							res.status(400);
+							res.end();
+							return;
+						}
+						console.log("Application %s with %s Team members", team.application, team.amount)
+						res.status(204);
+						res.end();
+					})
+
+
+				});
+
+			}
 		}
 	}
 

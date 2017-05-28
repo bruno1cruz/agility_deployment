@@ -8,4 +8,6 @@ module.exports = function(app) {
 	app.post("/api/apps/:app_name/releases", app.controllers.api.release.post);
 	app.get("/api/apps/:app_name/releases", app.controllers.api.release.get);
 
+	app.post("/api/apps/:app_name/teams", app.controllers.api.team.post);
+
 };

@@ -7,12 +7,15 @@ module.exports = function(app) {
 
     var team = Schema({
         amount:     {type: Number},
-        since:      {type: Date}
+        since:      {type: Date},
+        application: {type: String}
     }, { versionKey: false, collection : "team" });
 
-    team.methods.current = function(app_id){
-        return {amount:0};
+    team.statics.getTeamFrom = function(app_name,reference){
+        return app.models.Team.findOne({application: app_name, since: {$lte: reference} },{_id:false }, {sort:{_id:-1}});
     }
+
+    team.index({ "application": 1 });
 
     return db.model('team', team);
 };
