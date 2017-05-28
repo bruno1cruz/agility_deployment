@@ -21,6 +21,6 @@ services:
       - "7000:7000"
 
   swagger:
-    image: swaggerapi/swagger-editor
+    image: swaggerapi/swagger-ui
     ports: 
       - "7001:8080"
