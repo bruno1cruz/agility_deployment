@@ -1,6 +1,6 @@
 {
   "name": "agility_deployment",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "How long takes you project to go production?",
   "main": "index.js",
   "scripts": {
