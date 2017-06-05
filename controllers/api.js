@@ -54,7 +54,7 @@ module.exports = function(app){
 	                res.json(releases);
 	            });
 
-			},
+			}
 		},
 		refresh:{
 			get: function(req,res){
