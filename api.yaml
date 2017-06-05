@@ -50,7 +50,7 @@ paths:
       responses:
         201:
           description: Team added
-          
+
   /apps/{app_id}/releases:
     post:
       summary: creates a release
@@ -67,7 +67,7 @@ paths:
       responses:
         201:
           description: Release created
-    
+
     get:
       summary: list releases from an application
       parameters:
@@ -82,6 +82,22 @@ paths:
             type: array
             items:
               $ref: '#/definitions/ReleaseList'
+
+  /apps/{app_id}/releases/{name}:
+    delete:
+      summary: delete a release
+      parameters:
+        - name: app_id
+          in: path
+          required: true
+          type: string
+        - name: release
+          in: path
+          required: true
+      responses:
+        204:
+          description: Release Deleted
+
 
 definitions:
 
@@ -158,7 +174,7 @@ definitions:
           type:
             type: string
             enum: [build, git]
-            
+
   Team:
     type: object
     properties:
