@@ -1,7 +1,7 @@
 var Promise = require('promise');
 
 module.exports = function(app) {
-    
+
     var Schema = require('mongoose').Schema;
     var db = app.database.connection;
 

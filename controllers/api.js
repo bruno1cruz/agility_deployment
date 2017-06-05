@@ -18,30 +18,36 @@ module.exports = function(app){
 				release.name = body.name;
 
 				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
-
-
 					if (!application) {
 						errorHandler("application " + release.application+" not found", res, 404);
 						return;
 					}
+					app.models.Release.findOne({name:release.name , application: release.application}).limit(1).then(function(targetRelease){
+						if (targetRelease) {
+							console.log("release %s already exits", release.name)
+							res.status(200);
+							res.json(targetRelease)
+							return;
+						}else{
 
-					application.lastRelease().then(function(lastRelease){
+							application.lastRelease().then(function(lastRelease){
+								release.compare = lastRelease;
 
-						release.compare = lastRelease;
+								var gitRepo = new GitRepo( application.repository.owner ,application.repository.name);
 
-						var gitRepo = new GitRepo( application.repository.owner ,application.repository.name);
+								gitRepo.commits(release.name, release.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
 
-						gitRepo.commits(release.name, release.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
+									release.commits = commits;
+									release.save().then(function(release){
+										res.status(201);
+										res.json(release);
+									}, err => errorHandler(err,res));
 
-							release.commits = commits;
+								}, err => errorHandler(err,res));
+							},err => errorHandler(err,res));
+						}
 
-							release.save().then(function(release){
-								res.status(201);
-								res.json(release);
-							}, err => errorHandler(err,res));
-
-						}, err => errorHandler(err,res));
-					},err => errorHandler(err,res));
+					}, err => errorHandler(err,res));
 
 				}).catch(err => errorHandler(err,res));
 
@@ -54,6 +60,58 @@ module.exports = function(app){
 	                res.json(releases);
 	            });
 
+			},
+			delete: function(req,res){
+
+				let applicationName = req.params.app_name;
+				let releaseName = req.params.name;
+
+				app.models.Application.findOne({name:applicationName},{_id:false }).then(function(application){
+
+					if (!application) {
+							errorHandler("application " + applicationName +" not found", res, 404);
+							return;
+					}
+					app.models.Release.findOne({name:releaseName , application: applicationName}).limit(1).then(function(release){
+						if (!release) {
+								errorHandler("release " + releaseName +" not found", res, 404);
+								return;
+						}
+						application.lastRelease().then(function(lastReleaseName){
+
+							if(release.name==lastReleaseName){
+								 app.models.Release.remove({name:release.name}).then(function(){
+								 	res.status(204);
+								 	res.end();
+								 }).catch(err => errorHandler(err,res));
+							}else{
+
+								application.afterRelease(release).then(function(afterRelease){
+
+									afterRelease.compare = release.compare
+
+									var gitRepo = new GitRepo( application.repository.owner ,application.repository.name);
+
+									gitRepo.commits(afterRelease.name, afterRelease.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
+
+										afterRelease.commits = commits;
+
+										afterRelease.save().then(function(releaseUpdate){
+											app.models.Release.remove({name:release.name}).then(function(){
+		 								 	res.status(204);
+		 								 	res.end();
+		 								 }).catch(err => errorHandler(err,res));
+										}, err => errorHandler(err,res));
+
+									}, err => errorHandler(err,res));
+
+								},err => errorHandler(err,res));
+
+							}
+						},err => errorHandler(err,res));
+					},err=> errorHandler(err,res));
+
+				 }).catch(err => errorHandler(err,res));
 			}
 		},
 		refresh:{
@@ -107,7 +165,7 @@ module.exports = function(app){
 		team:{
 			post: function(req,res){
 				var team = new app.models.Team(req.body);
-				team.application = req.params.app_name;				
+				team.application = req.params.app_name;
 
 				app.models.Application.findOne({name: team.application},{_id:false }).then(function(application){
 

@@ -2,7 +2,7 @@ var moment = require("moment");
 var stats = require("stats-lite");
 
 module.exports = function(app) {
-    
+
     var Schema = require('mongoose').Schema;
     var db = app.database.connection;
 
@@ -17,7 +17,7 @@ module.exports = function(app) {
             miliseconds: {type: Number}
         }
     },{_id :false});
-    
+
     var release = Schema({
         name:        {type: String},
         compare:     {type: String},
@@ -54,16 +54,17 @@ module.exports = function(app) {
         var _this = this;
 
         this.fillTeam().then(function(team,err){
-
             if (team){
                 _this.team = team;
             } else {
                 console.log("no team found for application %s release %s",_this.application, _this.name);
             }
             console.log(_this.team, _this.name)
+
             next(err || null);
         });
-    
+
+
     })
 
     release.pre('save', function(next) {
@@ -78,15 +79,15 @@ module.exports = function(app) {
 
             var commitDifference = reference.diff(created);
             this.commits[i].diff.miliseconds = commitDifference;
-            
+
             additions+= this.commits[i].diff.additions;
             deletions+= this.commits[i].diff.deletions;
             differences.push(commitDifference);
         }
-        
+
         this.diff = {
-            miliseconds: stats.mean(differences), 
-            deletions : deletions, 
+            miliseconds: stats.mean(differences),
+            deletions : deletions,
             additions:additions,
             percentile_95: stats.percentile(differences,0.95),
             size: this.commits.length

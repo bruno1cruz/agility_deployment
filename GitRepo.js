@@ -13,7 +13,7 @@ function GitRepo(repositoryOwner, repositoryName){
 
 	this.repositoryOwner = repositoryOwner;
 	this.repositoryName = repositoryName;
-	 
+
 	var oauthClient = new ClientOAuth2({
 	  clientId: process.env.CLIENT_ID,
 	  clientSecret: process.env.CLIENT_SECRET,
@@ -22,7 +22,7 @@ function GitRepo(repositoryOwner, repositoryName){
 
 	this._oauthClient= oauthClient;
 }
-	
+
 
 GitRepo.prototype.token = function(){
 
@@ -33,8 +33,8 @@ GitRepo.prototype.token = function(){
 		if (that.accessToken){
 			resolve(that.accessToken);
 		} else {
-			token.refresh().then(function(data){ 
-				that.accessToken = data.accessToken; 
+			token.refresh().then(function(data){
+				that.accessToken = data.accessToken;
 				resolve(data.accessToken);
 			}, reject);
 		}
@@ -53,7 +53,7 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 				reject("no commit found for this release");
 			} else {
 				resolve(commits)
-			}	
+			}
 		},reject).catch(reject);
 
 	});
@@ -62,7 +62,7 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 
 GitRepo.prototype._request = function(uri){
 
-	var promise_token = this.token();	
+	var promise_token = this.token();
 
 	return new Promise(function(resolve,reject){
 
@@ -76,7 +76,6 @@ GitRepo.prototype._request = function(uri){
 					"Authorization":"Bearer " + token
 				}
 			},function(error, response, body){
-				
 				if (error) {
 					reject(error);
 				} else {
@@ -98,7 +97,7 @@ GitRepo.prototype.withDiff = function(commits){
 	return new Promise(function(resolve,reject){
 
 		var diffPromises = [];
-			
+
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);

@@ -1,7 +1,7 @@
 var Promise = require('promise');
 
 module.exports = function(app) {
-    
+
     var Schema = require('mongoose').Schema;
     var db = app.database.connection;
 
@@ -32,10 +32,48 @@ module.exports = function(app) {
         });
     }
 
+    application.methods.afterRelease = function(release){
+
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+
+            _this.releaseCreatedAfterThen(release).then(function(releaseAfter){
+                if (!releaseAfter || releaseAfter.length==0 ){
+                    console.info("no releases found. using milesone %s",_this.milestone)
+                    return resolve(_this.milestone);
+                }
+                return resolve(releaseAfter[0]);
+
+            },console.error);
+
+        });
+    }
+
+
+
+    application.methods.releaseByName = function(name){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            app.models.Release.findOne({name:name , application: this.name}).limit(1).then(function(release){
+                if (!release){
+                    console.info("no releases found. using milesone %s",_this.milestone)
+                    return resolve(release);
+                }
+                return resolve(release);
+            },console.error);
+
+        });
+    }
+
     application.methods.releases = function(){
         return app.models.Release.find({application: this.name},{_id:false }, {sort:{_id:-1}});
     }
 
+    application.methods.releaseCreatedAfterThen = function(release){
+        return app.models.Release.find({application:this.name, created:{$gt:release.created}}).sort({_id:1}).limit(1);
+    }
 
     return db.model('application', application);
 };
