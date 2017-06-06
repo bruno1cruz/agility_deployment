@@ -34,11 +34,11 @@ paths:
         "201":
           description: Application created
 
-  /apps/{app_id}/teams:
+  /apps/{app_name}/teams:
     post:
       summary: team to get things done
       parameters:
-        - name: app_id
+        - name: app_name
           in: path
           required: true
           type: string
@@ -51,11 +51,11 @@ paths:
         201:
           description: Team added
 
-  /apps/{app_id}/releases:
+  /apps/{app_name}/releases:
     post:
       summary: creates a release
       parameters:
-        - name: app_id
+        - name: app_name
           in: path
           required: true
           type: string
@@ -71,7 +71,7 @@ paths:
     get:
       summary: list releases from an application
       parameters:
-        - name: app_id
+        - name: app_name
           in: path
           required: true
           type: string
@@ -83,17 +83,18 @@ paths:
             items:
               $ref: '#/definitions/ReleaseList'
 
-  /apps/{app_id}/releases/{name}:
+  /apps/{app_name}/releases/{release_name}:
     delete:
       summary: delete a release
       parameters:
-        - name: app_id
+        - name: app_name
           in: path
           required: true
           type: string
-        - name: release
+        - name: release_name
           in: path
           required: true
+          type: string
       responses:
         204:
           description: Release Deleted
