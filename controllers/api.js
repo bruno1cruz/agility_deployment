@@ -174,7 +174,7 @@ module.exports = function(app){
 						return;
 					}
 
-					team.save(function(err){
+					team.save(function(err,team){
 
 						if (err){
 							console.error(err);
@@ -183,6 +183,9 @@ module.exports = function(app){
 							return;
 						}
 						console.log("Application %s with %s Team members", team.application, team.amount)
+
+						app.models.Release.sync(team);
+
 						res.status(204);
 						res.end();
 					})

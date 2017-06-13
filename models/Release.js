@@ -111,5 +111,20 @@ module.exports = function(app) {
         return app.models.Team.getTeamFrom(this.application,this.reference.created);
     }
 
+    release.statics.sync = function(team){
+
+        console.log("Will sync releases from %s", team.since);
+
+        app.models.Release.find({application:team.application, "reference.created":{ "$gte" : team.since } })
+            .then(function(releases){
+                console.log(releases)
+                for (var i=0; i< releases.length;i++) {
+                    console.log("release %s[%s] synced", team.application, releases[i].name)
+                    releases[i].save();
+                }
+            },console.error)
+
+    }
+
     return db.model('release', release);
 };

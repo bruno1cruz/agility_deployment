@@ -38,7 +38,7 @@ module.exports = function(app) {
 
         return new Promise(function(resolve, reject){
 
-            _this.releaseCreatedAfterThen(release).then(function(releaseAfter){
+            _this.releaseCreatedAfterThan(release).then(function(releaseAfter){
                 if (!releaseAfter || releaseAfter.length==0 ){
                     console.info("no releases found. using milesone %s",_this.milestone)
                     return resolve(_this.milestone);
@@ -71,7 +71,7 @@ module.exports = function(app) {
         return app.models.Release.find({application: this.name},{_id:false }, {sort:{_id:-1}});
     }
 
-    application.methods.releaseCreatedAfterThen = function(release){
+    application.methods.releaseCreatedAfterThan = function(release){
         return app.models.Release.find({application:this.name, created:{$gt:release.created}}).sort({_id:1}).limit(1);
     }
 
