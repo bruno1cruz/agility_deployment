@@ -153,8 +153,8 @@ module.exports = function(app){
 						return;
 					}
 					console.log("Application %s created", app.name)
-					res.status(201);
 					res.location("/apps/" + app.name);
+					res.status(201);
 					res.end();
 				})
 
