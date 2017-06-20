@@ -11,6 +11,9 @@ module.exports = function(app) {
         repository: {
         	owner: {type: String},
         	name: {type: String}
+        },
+        issues:     {
+            patterns:    {type: [String]}
         }
     }, { versionKey: false, collection : "application" });
 

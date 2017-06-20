@@ -38,6 +38,7 @@ module.exports = function(app){
 								gitRepo.commits(release.name, release.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
 
 									release.commits = commits;
+									release._application = application;
 									release.save().then(function(release){
 										res.status(201);
 										res.json(release);
@@ -126,6 +127,7 @@ module.exports = function(app){
 
 					app.models.Release.find({application:req.params.app_name},function(err, releases){
 	                	for (var i = 0; i < releases.length; i++){
+	                		releases[i]._application = application;
 	                		releases[i].save();
 	                		console.log("release " + releases[i].name + " refreshed");
 	                	}

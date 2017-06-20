@@ -1,5 +1,6 @@
 var moment = require("moment");
 var stats = require("stats-lite");
+var unique = require('array-unique');
 
 module.exports = function(app) {
 
@@ -29,6 +30,7 @@ module.exports = function(app) {
         environment: {type: String},
         application: {type: String},
         commits:     {type: [commit]},
+        issues:      {type: [String]},
         diff:{
             additions:     {type: Number},
             deletions:     {type: Number},
@@ -59,8 +61,7 @@ module.exports = function(app) {
             } else {
                 console.log("no team found for application %s release %s",_this.application, _this.name);
             }
-            console.log(_this.team, _this.name)
-
+            
             next(err || null);
         });
 
@@ -96,6 +97,27 @@ module.exports = function(app) {
         next();
     });
 
+
+    // issues
+    release.pre('save', function(next) {
+
+        var issues = [];
+
+        for ( var i = 0; i < this.commits.length; i++){
+            
+            var _issues = this.getIssuesFromCommit(this.commits[i]);
+
+            if (_issues) {
+                issues = issues.concat(_issues);
+            }
+        }
+        
+        this.issues = unique(issues);
+
+        next();
+    });
+
+
     release.methods.fillReference = function(){
         if (!this.reference|| !this.reference.type) {
             this.reference = {type: "build", created: this.created};
@@ -124,6 +146,29 @@ module.exports = function(app) {
                 }
             },console.error)
 
+    }
+
+    release.methods.getIssuesFromCommit = function(commit){
+
+        var patterns = this._application.issues?this._application.issues.patterns:undefined;
+
+        if (!patterns){ return; }
+
+        patterns = patterns.join("-[0-9]*|") + "-[0-9]*";
+
+        var issuesMatch = (commit.message || "").match(patterns);
+
+        if (!issuesMatch){ return; }
+
+        var issues =[];
+
+        for (var i =0;i<issuesMatch.length;i++){
+            issues.push(issuesMatch[0]);
+        }
+
+        console.info("Search for issues with %s into app[%s] commit[%s]", patterns,this._application.name,commit.hash);
+
+        return issues;
     }
 
     return db.model('release', release);

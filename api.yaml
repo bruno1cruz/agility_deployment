@@ -111,6 +111,11 @@ definitions:
       milestone:
         type: string
         description: Tag name or commit hash that will be used for the first reference
+      issues:
+        type: object
+        properties:
+          patterns:
+            type: array
       repository:
         type: object
         description: git repository information(must have read permission)
@@ -136,6 +141,9 @@ definitions:
           type:
             type: string
             enum: [build, git]
+      issues:
+        type: array
+
       diff:
         type: object
         properties:

@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/bruno1cruz/agility_deployment#readme",
   "dependencies": {
+    "array-unique": "^0.3.2",
     "body-parser": "^1.16.1",
     "client-oauth2": "^3.4.1",
     "cors": "^2.8.1",
