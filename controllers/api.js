@@ -160,6 +160,12 @@ module.exports = function(app){
 					res.end();
 				})
 
+			},
+			get: function(req,res){
+
+				app.models.Application.find().then(function(apps){					
+					res.json(apps);
+				})
 
 			}
 

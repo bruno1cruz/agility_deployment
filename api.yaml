@@ -33,6 +33,15 @@ paths:
       responses:
         "201":
           description: Application created
+    get:
+      summary: list applications
+      responses:
+        '200':
+          description: applications
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Application'
 
   /apps/{app_name}/teams:
     post:
@@ -116,6 +125,8 @@ definitions:
         properties:
           patterns:
             type: array
+            description: the issue should start with this pattern and a sequence of numbers
+
       repository:
         type: object
         description: git repository information(must have read permission)
