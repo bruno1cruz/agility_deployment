@@ -45,20 +45,31 @@ GitRepo.prototype.token = function(){
 GitRepo.prototype.commits = function(reference_to,reference_from){
 	var uri = util.format(REPOSITORY_COMMITS_URI,this.repositoryOwner,this.repositoryName,reference_to,reference_from);
 	var that = this;
+	const commitArray = [];
+	console.log('passou aqui');
+	return resolveCommits(uri, that, commitArray);
+}
 
+var resolveCommits = function(uri, that, commitArray) {
+	if(!commitArray) commitArray = [];
 	return new Promise(function(resolve,reject){
 		that._request(uri).then(function(body){
-			var commits = GitRepo._parse_commits(body);
+ 			var commits = GitRepo._parse_commits(body);
 			if (commits.length===0){
 				reject("no commit found for this release");
 			} else {
-				resolve(commits)
+				commitArray.push.apply(commitArray,commits);
+				let jsonBody = JSON.parse(body);
+				console.log(`commitArray= ${commitArray.length}`);
+				if(jsonBody.next){
+					resolve(resolveCommits(jsonBody.next, that, commitArray));
+				} else{
+					resolve(commitArray);
+				}
 			}
 		},reject).catch(reject);
-
 	});
 }
-
 
 GitRepo.prototype._request = function(uri){
 
