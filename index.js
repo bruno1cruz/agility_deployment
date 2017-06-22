@@ -9,7 +9,7 @@ app.use(require('cors')());
 
 // app.use(express.static(__dirname + '/public', 3600000));
 app.use(express.static(__dirname + '/bower_components'));
-app.use("/doc",express.static(__dirname + '/api.yaml'));
+app.use("/api",express.static(__dirname + '/api.yaml'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');

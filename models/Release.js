@@ -61,7 +61,7 @@ module.exports = function(app) {
             } else {
                 console.log("no team found for application %s release %s",_this.application, _this.name);
             }
-            
+
             next(err || null);
         });
 
@@ -104,14 +104,14 @@ module.exports = function(app) {
         var issues = [];
 
         for ( var i = 0; i < this.commits.length; i++){
-            
+
             var _issues = this.getIssuesFromCommit(this.commits[i]);
 
             if (_issues) {
                 issues = issues.concat(_issues);
             }
         }
-        
+
         this.issues = unique(issues);
 
         next();
@@ -151,9 +151,7 @@ module.exports = function(app) {
     release.methods.getIssuesFromCommit = function(commit){
 
         var patterns = this._application.issues?this._application.issues.patterns:undefined;
-
         if (!patterns){ return; }
-
         patterns = patterns.join("-[0-9]*|") + "-[0-9]*";
 
         var issuesMatch = (commit.message || "").match(patterns);

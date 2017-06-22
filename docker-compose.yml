@@ -8,7 +8,7 @@ services:
       - "9000:27017"
 
   agility:
-    image: bruno1cruz/agility_deployment:latest
+    build: image: bruno1cruz/agility_deployment:latest
     container_name: agility
     environment:
       CLIENT_ID:
@@ -24,3 +24,5 @@ services:
     image: swaggerapi/swagger-ui
     ports:
       - "7001:8080"
+    volumes:
+        - ./index.html:/usr/share/nginx/html/index.html
