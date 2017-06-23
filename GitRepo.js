@@ -46,7 +46,6 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 	var uri = util.format(REPOSITORY_COMMITS_URI,this.repositoryOwner,this.repositoryName,reference_to,reference_from);
 	var that = this;
 	const commitArray = [];
-	console.log('passou aqui');
 	return resolveCommits(uri, that, commitArray);
 }
 
@@ -109,7 +108,7 @@ GitRepo.prototype.withDiff = function(commits){
 	return new Promise(function(resolve,reject){
 
 		var diffPromises = [];
-			
+
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);

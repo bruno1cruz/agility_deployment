@@ -91,9 +91,7 @@ module.exports = function(app){
 
 				let applicationName = req.params.app_name;
 				let releaseName = req.params.name;
-
 				app.models.Application.findOne({name:applicationName},{_id:false }).then(function(application){
-
 					if (!application) {
 							errorHandler("application " + applicationName +" not found", res, 404);
 							return;
@@ -121,6 +119,7 @@ module.exports = function(app){
 									gitRepo.commits(afterRelease.name, afterRelease.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
 
 										afterRelease.commits = commits;
+										afterRelease._application = application;
 
 										afterRelease.save().then(function(releaseUpdate){
 											app.models.Release.remove({name:release.name}).then(function(){

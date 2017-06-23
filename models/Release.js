@@ -150,7 +150,7 @@ module.exports = function(app) {
 
     release.methods.getIssuesFromCommit = function(commit){
 
-        var patterns = this.application.issues?this.application.issues.patterns:undefined;
+        var patterns = this._application.issues?this._application.issues.patterns:undefined;
         if (!patterns){ return; }
         patterns = patterns.join("-[0-9]*|") + "-[0-9]*";
 
@@ -164,7 +164,7 @@ module.exports = function(app) {
             issues.push(issuesMatch[0]);
         }
 
-        console.info("Search for issues with %s into app[%s] commit[%s]", patterns,this.application.name,commit.hash);
+        console.info("Search for issues with %s into app[%s] commit[%s]", patterns,this._application.name,commit.hash);
 
         return issues;
     }
