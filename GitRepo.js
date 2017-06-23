@@ -46,7 +46,6 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 	var uri = util.format(REPOSITORY_COMMITS_URI,this.repositoryOwner,this.repositoryName,reference_to,reference_from);
 	var that = this;
 	const commitArray = [];
-	console.log('passou aqui');
 	return resolveCommits(uri, that, commitArray);
 }
 
@@ -60,7 +59,7 @@ var resolveCommits = function(uri, that, commitArray) {
 			} else {
 				commitArray.push.apply(commitArray,commits);
 				let jsonBody = JSON.parse(body);
-				console.log(`commitArray= ${commitArray.length}`);
+				console.log(`encountering ${commitArray.length} commits in this tag.`);
 				if(jsonBody.next){
 					resolve(resolveCommits(jsonBody.next, that, commitArray));
 				} else{
