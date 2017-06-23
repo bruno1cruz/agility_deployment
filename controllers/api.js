@@ -54,7 +54,7 @@ module.exports = function(app){
 				}).catch(err => errorHandler(err,res));
 
 			},
-			get: function(req,res){
+			list: function(req,res){
 
 				var application = req.params.app_name;
 				var createdDate = req.query.created;
@@ -85,6 +85,23 @@ module.exports = function(app){
 				app.models.Release.find({application:application},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
 	                res.json(releases);
 	            });
+
+			},
+			get: function(req,res){
+
+				let application = req.params.app_name;
+				let release = req.params.name;
+
+				app.models.Release.findOne({application:application, name:release},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, release){
+							if (release){
+								 res.json(release);
+					 		   res.status(200);
+						 }else{
+								 errorHandler("release pela data " + createdDateSince +" não foi encontrada", res, 404);
+								 return;
+						 }
+				  });
+					return
 
 			},
 			delete: function(req,res){
