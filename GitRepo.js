@@ -6,7 +6,7 @@ var util = require('util')
 var DiffParser = require('parse-diff')
 
 const REPOSITORY_URI = "https://api.bitbucket.org/2.0/repositories/%s/%s/";
-const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s&pagelen=100"
+const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s?pagelen=100"
 const REPOSITORY_DIFF_URI = REPOSITORY_URI + "diff/%s"
 
 function GitRepo(repositoryOwner, repositoryName){
@@ -46,7 +46,7 @@ GitRepo.prototype.commits = function(reference_to,reference_from){
 	var uri = util.format(REPOSITORY_COMMITS_URI,this.repositoryOwner,this.repositoryName,reference_to,reference_from);
 	var that = this;
 	const commitArray = [];
-	return resolveCommits(uri, that, commitArray);
+		return resolveCommits(uri, that, commitArray);
 }
 
 var resolveCommits = function(uri, that, commitArray) {
