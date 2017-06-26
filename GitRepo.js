@@ -1,9 +1,10 @@
 
 var Promise = require('promise');
 var request = require("request");
-var ClientOAuth2 = require('client-oauth2')
-var util = require('util')
-var DiffParser = require('parse-diff')
+var ClientOAuth2 = require('client-oauth2');
+var util = require('util');
+var DiffParser = require('parse-diff');
+var logger = require('./logger/logger.js');
 
 const REPOSITORY_URI = "https://api.bitbucket.org/2.0/repositories/%s/%s/";
 const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s&pagelen=100"
@@ -55,9 +56,10 @@ var resolveCommits = function(uri, that, commitArray) {
 		that._request(uri).then(function(body){
  			var commits = GitRepo._parse_commits(body);
 			if (commits.length===0){
-				reject("no commit found for this release");
+				reject(logger.warn("no commit found for this release"));
 			} else {
 				commitArray.push.apply(commitArray,commits);
+				logger.info(`Encountering ${commitArray.length} commits for this tag`);
 				let jsonBody = JSON.parse(body);
 				if(jsonBody.next){
 					resolve(resolveCommits(jsonBody.next, that, commitArray));
@@ -77,7 +79,7 @@ GitRepo.prototype._request = function(uri){
 
 		promise_token.then(function(token){
 
-			console.info("URI: %s",uri)
+			logger.info(`URI: ${uri}`);
 
 			request({
 				uri: uri,
@@ -99,7 +101,7 @@ GitRepo.prototype._request = function(uri){
 
 GitRepo.prototype.withDiff = function(commits){
 
-	console.log("calculating diff for %s commits", commits.length)
+	logger.info(`Calculating diff for ${commits.length} commits`);
 
 	var that = this;
 

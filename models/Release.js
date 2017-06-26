@@ -1,6 +1,7 @@
 var moment = require("moment");
 var stats = require("stats-lite");
 var unique = require('array-unique');
+var logger = require("../logger/logger.js");
 
 module.exports = function(app) {
 
@@ -59,9 +60,9 @@ module.exports = function(app) {
             if (team){
                 _this.team = team;
             } else {
-                console.log("no team found for application %s release %s",_this.application, _this.name);
+                logger.warn(`No team found for application ${_this.application} release ${_this.name}`);
             }
-            
+
             next(err || null);
         });
 
@@ -104,14 +105,14 @@ module.exports = function(app) {
         var issues = [];
 
         for ( var i = 0; i < this.commits.length; i++){
-            
+
             var _issues = this.getIssuesFromCommit(this.commits[i]);
 
             if (_issues) {
                 issues = issues.concat(_issues);
             }
         }
-        
+
         this.issues = unique(issues);
 
         next();
@@ -124,24 +125,23 @@ module.exports = function(app) {
         } else {
             var firstCommit = this.commits[0];
             this.reference.created = firstCommit.created;
-            console.log("using last commit creation as deployment reference [%s] %s %s", firstCommit.hash, firstCommit.message, firstCommit.created);
+            logger.info(`Using last commit creation as deployment reference [${firstCommit.hash}] ${firstCommit.message} ${firstCommit.created}`);
         }
     }
 
     release.methods.fillTeam = function(){
-        console.log("team from %s since %s",this.application,this.reference.created)
+        logger.info(`team from ${this.application} since ${this.reference.created}`)
         return app.models.Team.getTeamFrom(this.application,this.reference.created);
     }
 
     release.statics.sync = function(team){
 
-        console.log("Will sync releases from %s", team.since);
+        logger.info(`Will sync releases from ${team.since}`);
 
         app.models.Release.find({application:team.application, "reference.created":{ "$gte" : team.since } })
             .then(function(releases){
-                console.log(releases)
                 for (var i=0; i< releases.length;i++) {
-                    console.log("release %s[%s] synced", team.application, releases[i].name)
+                    logger.info(`release ${team.application}[${releases[i].name}] synced`)
                     releases[i].save();
                 }
             },console.error)
@@ -166,7 +166,7 @@ module.exports = function(app) {
             issues.push(issuesMatch[0]);
         }
 
-        console.info("Search for issues with %s into app[%s] commit[%s]", patterns,this._application.name,commit.hash);
+        logger.info(`Search for issues with ${patterns} into app[${this._application.name}] commit[${commit.hash}]`);
 
         return issues;
     }
