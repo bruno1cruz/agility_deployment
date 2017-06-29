@@ -54,32 +54,6 @@ module.exports = function(app){
 				}).catch(err => errorHandler(err,res));
 
 			},
-			list: function(req,res){
-
-				var application = req.params.app_name;
-				var createdDate = req.query.created;
-				var query = {application:application};
-
-				if (createdDate) {
-					var validDate = moment(createdDate, 'YYYY-MM-DD', true).isValid();
-					if (validDate){
-						let momentCreateDate = moment(createdDate)
-						let createdDateUntil = momentCreateDate.clone().add(1,"day").format();
-						let createdDateSince = momentCreateDate.format();
-
-						query.created = {$gte: createdDateSince,$lt: createdDateUntil};
-
-					} else {
-						errorHandler("data invalida", res, 400);
-						return;						
-					}
-				}
-
-				app.models.Release.find(query,{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
-	                res.json(releases);
-	            });
-
-			},
 			get: function(req,res){
 
 				let application = req.params.app_name;
@@ -88,9 +62,8 @@ module.exports = function(app){
 				app.models.Release.findOne({application:application, name:release},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, release){
 							if (release){
 								 res.json(release);
-					 		   res.status(200);
 						 }else{
-								 errorHandler("release pela data " + createdDateSince +" não foi encontrada", res, 404);
+								 errorHandler("release não foi encontrada", res, 404);
 								 return;
 						 }
 				  });
@@ -147,6 +120,34 @@ module.exports = function(app){
 					},err=> errorHandler(err,res));
 
 				 }).catch(err => errorHandler(err,res));
+			}
+		},
+		releases:{
+			get: function(req,res){
+
+				var application = req.params.app_name;
+				var createdDate = req.query.created;
+				var query = {application:application};
+
+				if (createdDate) {
+					var validDate = moment(createdDate, 'YYYY-MM-DD', true).isValid();
+					if (validDate){
+						let momentCreateDate = moment(createdDate)
+						let createdDateUntil = momentCreateDate.clone().add(1,"day").format();
+						let createdDateSince = momentCreateDate.format();
+
+						query.created = {$gte: createdDateSince,$lt: createdDateUntil};
+
+					} else {
+						errorHandler("data invalida", res, 400);
+						return;
+					}
+				}
+
+				app.models.Release.find(query,{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
+									res.json(releases);
+							});
+
 			}
 		},
 		refresh:{

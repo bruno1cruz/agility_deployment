@@ -8,7 +8,7 @@ module.exports = function(app) {
 	app.get("/api/apps", app.controllers.api.application.get);
 	app.post("/api/apps", app.controllers.api.application.post);
 	app.post("/api/apps/:app_name/releases", app.controllers.api.release.post);
-	app.get("/api/apps/:app_name/releases", app.controllers.api.release.list);
+	app.get("/api/apps/:app_name/releases", app.controllers.api.releases.get);
 	app.delete("/api/apps/:app_name/releases/:name", app.controllers.api.release.delete);
 	app.get("/api/apps/:app_name/releases/:name", app.controllers.api.release.get);
 
