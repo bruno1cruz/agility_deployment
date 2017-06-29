@@ -43,6 +43,32 @@ paths:
             items:
               $ref: '#/definitions/Application'
 
+  /apps/{app_name}/issues:
+    put:
+      summary: change issue patterns from an application
+      parameters:
+        - name: app_name
+          in: path
+          required: true
+          type: string
+        - in: body
+          name: issue_pattern
+          required: true
+          schema:
+            $ref: "#/definitions/IssuePattern"
+      responses:
+        "204":
+          description: Pattens updated
+    get:
+      summary: list applications
+      responses:
+        '200':
+          description: applications
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Application'
+
   /apps/{app_name}/teams:
     post:
       summary: team to get things done
@@ -136,6 +162,13 @@ definitions:
           owner:
             type: string
             description: Repository's owner
+
+  IssuePattern:
+    type: object
+    properties:
+      patterns:
+        type: array
+        description: the issue should start with this pattern and a sequence of numbers
 
   ReleaseList:
     type: object

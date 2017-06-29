@@ -168,6 +168,29 @@ module.exports = function(app){
 		},
 		application:{
 
+			issues:{
+
+				put: function(req,res){
+
+					if (!req.body||!req.body.patterns){
+						errorHandler("pattern list expected",res,400);
+						return;
+					}
+
+					app.models.Application.findOne({name: req.params.app_name}).then(function(application){
+						if (!application.issues) {
+							application.issues={}
+						}
+						application.issues= {patterns : req.body.patterns};
+						application.save();
+						res.status(204);
+						res.end();
+					});
+
+
+				}
+
+			},
 			post: function(req,res){
 
 				var body = req.body;
@@ -175,9 +198,7 @@ module.exports = function(app){
 
 				application.save(function(err,app){
 					if (err){
-						errorHandler("Error when saving to MongoDB",err,400);
-						res.status(400);
-						res.end();
+						errorHandler(err,res,400);
 						return;
 					}
 					logger.info(`Application ${app.name} created`)
