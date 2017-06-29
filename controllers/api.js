@@ -1,5 +1,6 @@
 
 var GitRepo = require("../GitRepo.js");
+var logger = require("../logger/logger.js");
 var Promise = require("promise");
 var moment = require("moment");
 
@@ -20,12 +21,12 @@ module.exports = function(app){
 
 				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
 					if (!application) {
-						errorHandler("application " + release.application+" not found", res, 404);
+						errorHandler(`Application ${release.application} not found`, res, 404);
 						return;
 					}
 					app.models.Release.findOne({name:release.name , application: release.application}).limit(1).then(function(targetRelease){
 						if (targetRelease) {
-							console.log("release %s already exits", release.name)
+							logger.info(`Release ${release.name} already exist!`)
 							res.status(200);
 							res.json(targetRelease)
 							return;
@@ -76,12 +77,12 @@ module.exports = function(app){
 				let releaseName = req.params.name;
 				app.models.Application.findOne({name:applicationName},{_id:false }).then(function(application){
 					if (!application) {
-							errorHandler("application " + applicationName +" not found", res, 404);
+							errorHandler(`Application ${applicationName} not found`, res, 404);
 							return;
 					}
 					app.models.Release.findOne({name:releaseName , application: applicationName}).limit(1).then(function(release){
 						if (!release) {
-								errorHandler("release " + releaseName +" not found", res, 404);
+								errorHandler(`Release ${releaseName} not found`, res, 404);
 								return;
 						}
 						application.lastRelease().then(function(lastReleaseName){
@@ -156,7 +157,7 @@ module.exports = function(app){
 				app.models.Application.findOne({name: req.params.app_name},{_id:false }).then(function(application){
 
 					if (!application) {
-						errorHandler("application " + req.params.app_name +" not found", res, 404);
+						errorHandler(`Application ${req.params.app_name} not found`, res, 404);
 						return;
 					}
 
@@ -164,7 +165,7 @@ module.exports = function(app){
 	                	for (var i = 0; i < releases.length; i++){
 	                		releases[i]._application = application;
 	                		releases[i].save();
-	                		console.log("release " + releases[i].name + " refreshed");
+											logger.info(`Release ${releases[i].name} refreshed`);
 	                	}
 	            	});
 
@@ -177,6 +178,29 @@ module.exports = function(app){
 		},
 		application:{
 
+			issues:{
+
+				put: function(req,res){
+
+					if (!req.body||!req.body.patterns){
+						errorHandler("pattern list expected",res,400);
+						return;
+					}
+
+					app.models.Application.findOne({name: req.params.app_name}).then(function(application){
+						if (!application.issues) {
+							application.issues={}
+						}
+						application.issues= {patterns : req.body.patterns};
+						application.save();
+						res.status(204);
+						res.end();
+					});
+
+
+				}
+
+			},
 			post: function(req,res){
 
 				var body = req.body;
@@ -184,12 +208,10 @@ module.exports = function(app){
 
 				application.save(function(err,app){
 					if (err){
-						console.error(err);
-						res.status(400);
-						res.end();
+						errorHandler(err,res,400);
 						return;
 					}
-					console.log("Application %s created", app.name)
+					logger.info(`Application ${app.name} created`)
 					res.location("/apps/" + app.name);
 					res.status(201);
 					res.end();
@@ -213,19 +235,19 @@ module.exports = function(app){
 				app.models.Application.findOne({name: team.application},{_id:false }).then(function(application){
 
 					if (!application) {
-						errorHandler("application " + req.params.app_name +" not found", res, 404);
+						errorHandler(`Application ${req.params.app_name} not found`, res, 404);
 						return;
 					}
 
 					team.save(function(err,team){
 
 						if (err){
-							console.error(err);
+							errorHandler("Error when saving to MongoDB",err,400);
 							res.status(400);
 							res.end();
 							return;
 						}
-						console.log("Application %s with %s Team members", team.application, team.amount)
+						logger.info(`Application ${team.application} with ${team.amount} Team members`)
 
 						app.models.Release.sync(team);
 
@@ -244,8 +266,8 @@ module.exports = function(app){
 
 function errorHandler(err, response, statusCode){
 	statusCode = statusCode || 500;
-	console.error(err);
 	response.status(statusCode);
 	var message = err instanceof Error ? err.message : err
+	logger.error(`${message}`, { stacktrace: err, statusCode: statusCode});
 	response.json({"message" : message});
 }
