@@ -46,7 +46,6 @@ GitRepo.prototype.token = function(){
 GitRepo.prototype.commits = function(reference_to,reference_from){
 	var uri = util.format(REPOSITORY_COMMITS_URI,this.repositoryOwner,this.repositoryName,reference_to,reference_from);
 	var that = this;
-
 	const commitArray = [];
 	return resolveCommits(uri, that, commitArray);
 }
@@ -55,7 +54,6 @@ var resolveCommits = function(uri, that, commitArray) {
 	if(!commitArray) commitArray = [];
 	return new Promise(function(resolve,reject){
 		that._request(uri).then(function(body){
-
  			var commits = GitRepo._parse_commits(body);
 			if (commits.length===0){
 				reject(logger.warn("no commit found for this release"));
@@ -149,16 +147,14 @@ GitRepo._parse_diff = function(diff){
 
 GitRepo._parse_commits = function(body){
 
-	 body = JSON.parse(body);
+	body = JSON.parse(body);
 
 	if (body.type === "error"){
 		throw new Error(body.error.message);
 	}
 
-
 	var _commits = body.values;
 	var commits = [];
-
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
 	  var _commit = _commits[i];
