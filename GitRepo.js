@@ -109,7 +109,7 @@ GitRepo.prototype.withDiff = function(commits){
 	return new Promise(function(resolve,reject){
 
 		var diffPromises = [];
-			
+
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);

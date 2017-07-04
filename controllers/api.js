@@ -57,44 +57,25 @@ module.exports = function(app){
 			},
 			get: function(req,res){
 
-				var application = req.params.app_name;
-				var createdDate = req.query.created;
+				let application = req.params.app_name;
+				let release = req.params.name;
 
-				if (createdDate) {
-					var validDate = moment(createdDate, 'YYYY-MM-DD', true).isValid();
-					if (validDate){
-						let momentCreateDate = moment(createdDate)
-						let createdDateUntil = momentCreateDate.clone().add(1,"day").format();
-						let createdDateSince = momentCreateDate.format();
-
-						app.models.Release.find({application:application, created:{$gte: createdDateSince,$lt: createdDateUntil} },{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
-									 if (releases.length > 0){
-										 res.json(releases);
-					 				   res.status(200);
-									 }else{
-										 errorHandler("release pela data " + createdDateSince +" não foi encontrada", res, 404);
-										 return;
-									 }
-			            });
-
-							return
-					}
-
-					errorHandler("data invalida", res, 400);
-					return;
-				}
-				app.models.Release.find({application:application},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
-	                res.json(releases);
-	            });
+				app.models.Release.findOne({application:application, name:release},{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, release){
+							if (release){
+								 res.json(release);
+						 }else{
+								 errorHandler("release não foi encontrada", res, 404);
+								 return;
+						 }
+				  });
+					return
 
 			},
 			delete: function(req,res){
 
 				let applicationName = req.params.app_name;
 				let releaseName = req.params.name;
-
 				app.models.Application.findOne({name:applicationName},{_id:false }).then(function(application){
-
 					if (!application) {
 							errorHandler(`Application ${applicationName} not found`, res, 404);
 							return;
@@ -122,6 +103,7 @@ module.exports = function(app){
 									gitRepo.commits(afterRelease.name, afterRelease.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
 
 										afterRelease.commits = commits;
+										afterRelease._application = application;
 
 										afterRelease.save().then(function(releaseUpdate){
 											app.models.Release.remove({name:release.name}).then(function(){
@@ -139,6 +121,34 @@ module.exports = function(app){
 					},err=> errorHandler(err,res));
 
 				 }).catch(err => errorHandler(err,res));
+			}
+		},
+		releases:{
+			get: function(req,res){
+
+				var application = req.params.app_name;
+				var createdDate = req.query.created;
+				var query = {application:application};
+
+				if (createdDate) {
+					var validDate = moment(createdDate, 'YYYY-MM-DD', true).isValid();
+					if (validDate){
+						let momentCreateDate = moment(createdDate)
+						let createdDateUntil = momentCreateDate.clone().add(1,"day").format();
+						let createdDateSince = momentCreateDate.format();
+
+						query.created = {$gte: createdDateSince,$lt: createdDateUntil};
+
+					} else {
+						errorHandler("data invalida", res, 400);
+						return;
+					}
+				}
+
+				app.models.Release.find(query,{_id:false,commits:false }, {sort:{"reference.created":1}},function(err, releases){
+									res.json(releases);
+							});
+
 			}
 		},
 		refresh:{
