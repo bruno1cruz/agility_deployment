@@ -26,6 +26,7 @@ module.exports = function(app) {
         created:     {type:Date,default:Date.now},
         reference:     {
             created: {type: Date},
+            started: {type: Date},
             type:    {type:String}
         },
         environment: {type: String},
@@ -120,11 +121,13 @@ module.exports = function(app) {
 
 
     release.methods.fillReference = function(){
+        var lastCommit = this.commits[this.commits.length-1];
         if (!this.reference|| !this.reference.type) {
-            this.reference = {type: "build", created: this.created};
+            this.reference = {type: "build", created: this.created, started:lastCommit.created};
         } else {
             var firstCommit = this.commits[0];
             this.reference.created = firstCommit.created;
+            this.reference.started = lastCommit.created;
             logger.info(`Using last commit creation as deployment reference [${firstCommit.hash}] ${firstCommit.message} ${firstCommit.created}`);
         }
     }
