@@ -1,8 +1,8 @@
 const Joi = require('joi');
+var GitRepo = require("../GitRepo.js");
 const schema = require("./schema/release.js");
-var logger = require("../logger/logger.js");
-var assync = require("../assync.js");
-
+var logger = require("../infra/logger/logger.js");
+var assync = require("../assync.js")
 module.exports = function(app){
 
 	return {
@@ -33,9 +33,11 @@ module.exports = function(app){
                       return;
                     }else{
                       application.lastRelease().then(function(lastRelease){
-												console.log("aqui!")
                         release.compare = lastRelease;
-                        assync.createRelease(application,release);
+												var gitRepo = new GitRepo(application.repository.owner ,application.repository.name);
+												assync.createRelease(release,gitRepo,app);
+												console.log("passou aqui")
+
 												res.end()
                       });
                     }

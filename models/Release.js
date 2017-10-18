@@ -1,7 +1,7 @@
 var moment = require("moment");
 var stats = require("stats-lite");
 var unique = require('array-unique');
-var logger = require("../logger/logger.js");
+var logger = require("../infra/logger/logger.js");
 
 module.exports = function(app) {
 

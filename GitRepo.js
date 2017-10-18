@@ -4,14 +4,14 @@ var request = require("request");
 var ClientOAuth2 = require('client-oauth2');
 var util = require('util');
 var DiffParser = require('parse-diff');
-var logger = require('./logger/logger.js');
+var logger = require('./infra/logger/logger.js');
 
 const REPOSITORY_URI = "https://api.bitbucket.org/2.0/repositories/%s/%s/";
 const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s&pagelen=100"
 const REPOSITORY_DIFF_URI = REPOSITORY_URI + "diff/%s"
 
 function GitRepo(repositoryOwner, repositoryName){
-
+	console.log("aquii")
 	this.repositoryOwner = repositoryOwner;
 	this.repositoryName = repositoryName;
 
@@ -87,7 +87,6 @@ GitRepo.prototype._request = function(uri){
 					"Authorization":"Bearer " + token
 				}
 			},function(error, response, body){
-
 				if (error) {
 					reject(error);
 				} else {
@@ -98,6 +97,69 @@ GitRepo.prototype._request = function(uri){
 		}, reject);
 	});
 
+}
+GitRepo.prototype._requestAssync = function(uri,pub,commit){
+
+	var promise_token = this.token();
+
+	return new Promise(function(resolve,reject){
+
+		promise_token.then(function(token){
+
+			logger.info(`URI: ${uri}`);
+
+			request({
+				uri: uri,
+				headers:{
+					"Authorization":"Bearer " + token
+				}
+			},function(error, response, body){
+				if (error) {
+					reject(error);
+				} else if(response.statusCode==200){
+					resolve(body);
+				}else{
+					commit._error = true
+					pub.publishErrorCommit(commit);
+					resolve("");
+				}
+			});
+
+		}, reject);
+	});
+
+}
+
+GitRepo.prototype.withDiffAssync = function(commits,pub){
+
+	logger.info(`Calculating diff for ${commits.length} commits`);
+
+	var that = this;
+
+	return new Promise(function(resolve,reject){
+
+		var diffPromises = [];
+
+		for (var i = 0; i < commits.length; i++) {
+
+			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
+
+			diffPromises.push(that._requestAssync(uri,pub,commits[i]));
+		}
+
+		Promise.all(diffPromises).then(function(rawDiffs){
+
+			for (var i = 0; i < rawDiffs.length; i++){
+				var diff = GitRepo._parse_diff(rawDiffs[i]);
+
+				commits[i].diff = diff;
+			}
+
+			resolve(commits);
+		})
+
+
+	});
 }
 
 GitRepo.prototype.withDiff = function(commits){

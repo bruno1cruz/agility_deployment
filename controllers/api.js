@@ -1,6 +1,6 @@
 
 var GitRepo = require("../GitRepo.js");
-var logger = require("../logger/logger.js");
+var logger = require("../infra/logger/logger.js");
 var Promise = require("promise");
 var moment = require("moment");
 
