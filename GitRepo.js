@@ -10,10 +10,10 @@ const REPOSITORY_URI = "https://api.bitbucket.org/2.0/repositories/%s/%s/";
 const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s&pagelen=100"
 const REPOSITORY_DIFF_URI = REPOSITORY_URI + "diff/%s"
 
-function GitRepo(repositoryOwner, repositoryName){
-	console.log("aquii")
+function GitRepo(repositoryOwner, repositoryName, releaseEvent){
 	this.repositoryOwner = repositoryOwner;
 	this.repositoryName = repositoryName;
+	this.releaseEvent = releaseEvent;
 
 	var oauthClient = new ClientOAuth2({
 	  clientId: process.env.CLIENT_ID,
@@ -71,15 +71,16 @@ var resolveCommits = function(uri, that, commitArray) {
 	});
 }
 
-GitRepo.prototype._request = function(uri){
+GitRepo.prototype._request = function(uri,commit){
 
 	var promise_token = this.token();
-
+	var self = this;
 	return new Promise(function(resolve,reject){
 
 		promise_token.then(function(token){
 
 			logger.info(`URI: ${uri}`);
+			logger.info(`COMMIT: ${commit}`);
 
 			request({
 				uri: uri,
@@ -87,79 +88,21 @@ GitRepo.prototype._request = function(uri){
 					"Authorization":"Bearer " + token
 				}
 			},function(error, response, body){
+				console.log(response.statusCode);
 				if (error) {
 					reject(error);
-				} else {
+				} else if(response.statusCode == 200){
 					resolve(body);
+				}else if(commit){
+						console.log(commit)
+						self.releaseEvent.publishErrorCommit("{'teste':'ola'}");
+						resolve("");
 				}
 			});
 
 		}, reject);
 	});
 
-}
-GitRepo.prototype._requestAssync = function(uri,pub,commit){
-
-	var promise_token = this.token();
-
-	return new Promise(function(resolve,reject){
-
-		promise_token.then(function(token){
-
-			logger.info(`URI: ${uri}`);
-
-			request({
-				uri: uri,
-				headers:{
-					"Authorization":"Bearer " + token
-				}
-			},function(error, response, body){
-				if (error) {
-					reject(error);
-				} else if(response.statusCode==200){
-					resolve(body);
-				}else{
-					commit._error = true
-					pub.publishErrorCommit(commit);
-					resolve("");
-				}
-			});
-
-		}, reject);
-	});
-
-}
-
-GitRepo.prototype.withDiffAssync = function(commits,pub){
-
-	logger.info(`Calculating diff for ${commits.length} commits`);
-
-	var that = this;
-
-	return new Promise(function(resolve,reject){
-
-		var diffPromises = [];
-
-		for (var i = 0; i < commits.length; i++) {
-
-			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
-
-			diffPromises.push(that._requestAssync(uri,pub,commits[i]));
-		}
-
-		Promise.all(diffPromises).then(function(rawDiffs){
-
-			for (var i = 0; i < rawDiffs.length; i++){
-				var diff = GitRepo._parse_diff(rawDiffs[i]);
-
-				commits[i].diff = diff;
-			}
-
-			resolve(commits);
-		})
-
-
-	});
 }
 
 GitRepo.prototype.withDiff = function(commits){
@@ -175,8 +118,9 @@ GitRepo.prototype.withDiff = function(commits){
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
-
-			diffPromises.push(that._request(uri));
+			var commit = commits[i];
+			console.log(commits[i])
+			diffPromises.push(that._request(uri,commit));
 		}
 
 		Promise.all(diffPromises).then(function(rawDiffs){
@@ -221,7 +165,7 @@ GitRepo._parse_commits = function(body){
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
 	  var _commit = _commits[i];
-	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message });
+	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message,"error":false });
 	}
 
 	return commits;

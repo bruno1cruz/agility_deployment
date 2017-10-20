@@ -1,22 +1,19 @@
 
 var redisClient = require('./infra/message/clientRedis.js');
-var eventPublish = require('./infra/message/eventPublish.js')(redisClient);
-var eventSub = require('./infra/message/eventSub.js')(redisClient);
+var clientSub = redisClient().getClient(), clientEvent = redisClient().getClient();
 
-var releaseEvent = require('./infra/event/release.js')(eventSub);
-var releaseQueue = require('./infra/queue/release.js');
+var eventPublish = require('./infra/message/eventPublish.js')(clientEvent);
+var eventSub = require('./infra/message/eventSub.js')(clientSub);
+
+var releaseEvent = require('./event/release.js')(eventPublish);
+var releaseQueue = require('./queue/release.js')(eventSub);
+var GitRepo = require("./GitRepo.js");
 
 module.exports = {
-
-    createRelease: function(release,application,gitRepo){
-      console.log("criar release")
-      gitRepo.commits(release.name, release.compare)
-      .then(commits=>gitRepo.withDiffAssync(commits,releaseEvent))
-      .then(function(commits){
-        release.commits = commits;
-        release._application = application;
-        console.log(release)
-      });
+    createRelease: function(release,application){
+      var gitRepo =  new GitRepo(application.repository.owner ,application.repository.name,releaseEvent);
+      releaseQueue.setGitInfo(gitRepo);
+      releaseEvent.publishCreateRelease(release);
       return
     }
 };

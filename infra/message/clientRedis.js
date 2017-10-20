@@ -5,7 +5,7 @@ function RedisClient() {
   this.port = 6379;
 }
 
-RedisClient.prototype.getConnection = function() {
+RedisClient.prototype.getClient = function() {
   return redis.createClient(this.port,this.host);
 };
 
