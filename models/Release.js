@@ -13,6 +13,7 @@ module.exports = function(app) {
         author:  {type:String},
         message: {type:String},
         created: {type:Date},
+        error:   {type:Boolean},
         diff:{
             additions: {type: Number},
             deletions: {type: Number},
@@ -55,22 +56,6 @@ module.exports = function(app) {
     })
 
     release.pre('save', function(next) {
-        var _this = this;
-
-        this.fillTeam().then(function(team,err){
-            if (team){
-                _this.team = team;
-            } else {
-                logger.warn(`No team found for application ${_this.application} release ${_this.name}`);
-            }
-
-            next(err || null);
-        });
-
-
-    })
-
-    release.pre('save', function(next) {
         var differences = [];
         var additions = 0;
         var deletions = 0;
@@ -78,6 +63,7 @@ module.exports = function(app) {
         var reference = moment(this.reference.created);
 
         for ( var i = 0; i < this.commits.length; i++){
+
             var created = moment(this.commits[i].created);
 
             var commitDifference = reference.diff(created);
@@ -132,10 +118,6 @@ module.exports = function(app) {
         }
     }
 
-    release.methods.fillTeam = function(){
-        logger.info(`team from ${this.application} since ${this.reference.created}`)
-        return app.models.Team.getTeamFrom(this.application,this.reference.created);
-    }
 
     release.statics.sync = function(team){
 
