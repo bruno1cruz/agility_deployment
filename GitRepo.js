@@ -93,7 +93,7 @@ GitRepo.prototype._request = function(uri,commit){
 				} else if(response.statusCode == 200){
 					resolve(body);
 				}else{
-					logger.info(`Commit com error: ${commit}`)
+					logger.info(`Commit com error: ${commit.hash}`)
 					commit.error = true;
 					resolve("")
 				}
