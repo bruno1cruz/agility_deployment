@@ -71,7 +71,7 @@ var resolveCommits = function(uri, that, commitArray) {
 	});
 }
 
-GitRepo.prototype._request = function(uri){
+GitRepo.prototype._request = function(uri,commit){
 
 	var promise_token = this.token();
 
@@ -90,8 +90,12 @@ GitRepo.prototype._request = function(uri){
 
 				if (error) {
 					reject(error);
-				} else {
+				} else if(response.statusCode == 200){
 					resolve(body);
+				}else{
+					logger.info(`Commit com error: ${commit}`)
+					commit.error = true;
+					resolve("")
 				}
 			});
 
@@ -113,8 +117,8 @@ GitRepo.prototype.withDiff = function(commits){
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
-
-			diffPromises.push(that._request(uri));
+			var commit = commits[i];
+			diffPromises.push(that._request(uri,commit));
 		}
 
 		Promise.all(diffPromises).then(function(rawDiffs){
@@ -159,7 +163,7 @@ GitRepo._parse_commits = function(body){
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
 	  var _commit = _commits[i];
-	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message });
+	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message, "error": false });
 	}
 
 	return commits;

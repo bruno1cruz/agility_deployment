@@ -13,6 +13,7 @@ module.exports = function(app) {
         author:  {type:String},
         message: {type:String},
         created: {type:Date},
+        error:   {type:Boolean},
         diff:{
             additions: {type: Number},
             deletions: {type: Number},
@@ -78,6 +79,7 @@ module.exports = function(app) {
         var reference = moment(this.reference.created);
 
         for ( var i = 0; i < this.commits.length; i++){
+
             var created = moment(this.commits[i].created);
 
             var commitDifference = reference.diff(created);
@@ -86,6 +88,9 @@ module.exports = function(app) {
             additions+= this.commits[i].diff.additions;
             deletions+= this.commits[i].diff.deletions;
             differences.push(commitDifference);
+            if(commits[i].error == true){
+              console.log(commits[i]);
+            }
         }
 
         this.diff = {
