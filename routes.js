@@ -13,6 +13,4 @@ module.exports = function(app) {
 	app.delete("/api/apps/:app_name/releases/:name", app.controllers.api.release.delete);
 	app.get("/api/apps/:app_name/releases/:name", app.controllers.api.release.get);
 
-	app.post("/api/apps/:app_name/teams", app.controllers.api.team.post);
-
 };

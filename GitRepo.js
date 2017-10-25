@@ -54,6 +54,10 @@ var resolveCommits = function(uri, that, commitArray) {
 	if(!commitArray) commitArray = [];
 	return new Promise(function(resolve,reject){
 		that._request(uri).then(function(body){
+			if(body instanceof Error){
+				reject(body);
+				return
+			}
  			var commits = GitRepo._parse_commits(body);
 			if (commits.length===0){
 				reject(logger.warn("no commit found for this release"));
@@ -71,7 +75,7 @@ var resolveCommits = function(uri, that, commitArray) {
 	});
 }
 
-GitRepo.prototype._request = function(uri,commit){
+GitRepo.prototype._request = function(uri){
 
 	var promise_token = this.token();
 
@@ -93,9 +97,7 @@ GitRepo.prototype._request = function(uri,commit){
 				} else if(response.statusCode == 200){
 					resolve(body);
 				}else{
-					logger.info(`Commit com error: ${commit.hash}`)
-					commit.error = true;
-					resolve("")
+					resolve(new Error("status code "+ response.statusCode))
 				}
 			});
 
@@ -117,21 +119,21 @@ GitRepo.prototype.withDiff = function(commits){
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
-			var commit = commits[i];
-			diffPromises.push(that._request(uri,commit));
+			diffPromises.push(that._request(uri));
 		}
 
 		Promise.all(diffPromises).then(function(rawDiffs){
-
 			for (var i = 0; i < rawDiffs.length; i++){
-				var diff = GitRepo._parse_diff(rawDiffs[i]);
-
-				commits[i].diff = diff;
+				if(rawDiffs[i] instanceof Error){
+					commits[i].error = true;
+					logger.error(`diff ${rawDiffs[i]} for commit ${JSON.stringify(commits[i])}`);
+				}else{
+					var diff = GitRepo._parse_diff(rawDiffs[i]);
+					commits[i].diff = diff;
+				}
 			}
-
 			resolve(commits);
 		})
-
 
 	});
 }

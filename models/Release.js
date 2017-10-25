@@ -40,10 +40,6 @@ module.exports = function(app) {
             miliseconds:   {type: Number},
             percentile_95: {type: Number},
             size:          {type: Number}
-        },
-        team:     {
-            amount:     {type: Number},
-            since:      {type: Date}
         }
     }, { versionKey: false, collection : "release", toObject: { virtuals: true }, toJSON: { virtuals: true, commits: false } } );
 
@@ -63,15 +59,16 @@ module.exports = function(app) {
         var reference = moment(this.reference.created);
 
         for ( var i = 0; i < this.commits.length; i++){
+           if(!this.commits[i].error){
+             var created = moment(this.commits[i].created);
 
-            var created = moment(this.commits[i].created);
+             var commitDifference = reference.diff(created);
+             this.commits[i].diff.miliseconds = commitDifference;
 
-            var commitDifference = reference.diff(created);
-            this.commits[i].diff.miliseconds = commitDifference;
-
-            additions+= this.commits[i].diff.additions;
-            deletions+= this.commits[i].diff.deletions;
-            differences.push(commitDifference);
+             additions+= this.commits[i].diff.additions;
+             deletions+= this.commits[i].diff.deletions;
+             differences.push(commitDifference);
+           }
         }
 
         this.diff = {
