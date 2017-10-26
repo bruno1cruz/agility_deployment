@@ -54,6 +54,10 @@ var resolveCommits = function(uri, that, commitArray) {
 	if(!commitArray) commitArray = [];
 	return new Promise(function(resolve,reject){
 		that._request(uri).then(function(body){
+			if(body instanceof Error){
+				reject(body);
+				return
+			}
  			var commits = GitRepo._parse_commits(body);
 			if (commits.length===0){
 				reject(logger.warn("no commit found for this release"));
@@ -90,8 +94,10 @@ GitRepo.prototype._request = function(uri){
 
 				if (error) {
 					reject(error);
-				} else {
+				} else if(response.statusCode == 200){
 					resolve(body);
+				}else{
+					resolve(new Error("status code "+ response.statusCode))
 				}
 			});
 
@@ -113,21 +119,21 @@ GitRepo.prototype.withDiff = function(commits){
 		for (var i = 0; i < commits.length; i++) {
 
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
-
 			diffPromises.push(that._request(uri));
 		}
 
 		Promise.all(diffPromises).then(function(rawDiffs){
-
 			for (var i = 0; i < rawDiffs.length; i++){
-				var diff = GitRepo._parse_diff(rawDiffs[i]);
-
-				commits[i].diff = diff;
+				if(rawDiffs[i] instanceof Error){
+					commits[i].error = true;
+					logger.error(`diff ${rawDiffs[i]} for commit ${JSON.stringify(commits[i])}`);
+				}else{
+					var diff = GitRepo._parse_diff(rawDiffs[i]);
+					commits[i].diff = diff;
+				}
 			}
-
 			resolve(commits);
 		})
-
 
 	});
 }
@@ -159,7 +165,7 @@ GitRepo._parse_commits = function(body){
 
 	for (var i = 0, len = _commits.length; i < len; i++) {
 	  var _commit = _commits[i];
-	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message });
+	  commits.push({ "hash": _commit.hash, "created": _commit.date, "author": _commit.author&&_commit.author.user?_commit.author.user.username:"no-user", "message": _commit.message, "error": false });
 	}
 
 	return commits;

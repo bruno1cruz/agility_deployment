@@ -69,23 +69,6 @@ paths:
             items:
               $ref: '#/definitions/Application'
 
-  /apps/{app_name}/teams:
-    post:
-      summary: team to get things done
-      parameters:
-        - name: app_name
-          in: path
-          required: true
-          type: string
-        - name: team
-          in: body
-          required: true
-          schema:
-            $ref: '#/definitions/Team'
-      responses:
-        201:
-          description: Team added
-
   /apps/{app_name}/releases:
     post:
       summary: creates a release
