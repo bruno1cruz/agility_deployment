@@ -10,7 +10,7 @@
   	<script src="/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="/highcharts/highstock.js"></script>
     <script src="/moment/moment.js"></script>
-    
+
     <title>How fast can you go</title>
 
 </head>
@@ -31,7 +31,6 @@
         <td>Additions</td>
         <td>Deletions</td>
         <td>Commits</td>
-        <td>Team</td>
         <td>Percentile 95% Commit &#916;t</td>
         <td>Mean Commit &#916;t</td>
       </tr></thead>
@@ -48,7 +47,6 @@
     $.getJSON( "/api/apps/<%=application%>/releases", function( data ) {
 
       var minutesSeriesData = [], minutesPercentile95SeriesData=[];
-      var minutesSeriesTeamData = [], minutesPercentile95SeriesTeamData=[];;
       var categories = [];
       var diffGroupSeriesData = {additions:[],deletions:[],commits:[]}
       var frequencySeries =[];
@@ -56,12 +54,9 @@
       for(var i=0;i<data.length;i++){
         var release = data[i];
         categories.push(release.name)
-        
+
         minutesSeriesData.push(release.diff.miliseconds/1000/60);
         minutesPercentile95SeriesData.push(release.diff.percentile_95/1000/60);
-
-        minutesSeriesTeamData.push(release.team?release.diff.miliseconds/1000/60/release.team.amount:0);
-        minutesPercentile95SeriesTeamData.push(release.team?release.diff.percentile_95/1000/60/release.team.amount:0);
 
         diffGroupSeriesData.additions.push(release.diff.additions);
         diffGroupSeriesData.deletions.push(release.diff.deletions);
@@ -71,7 +66,7 @@
       }
 
       drawTable(data);
-      drawLineReleases(categories,minutesSeriesData,minutesPercentile95SeriesData,minutesSeriesTeamData,minutesPercentile95SeriesTeamData);
+      drawLineReleases(categories,minutesSeriesData,minutesPercentile95SeriesData);
       drawDiffReleases(categories,diffGroupSeriesData);
 
       drawFrequency(frequencySeries);
@@ -80,7 +75,7 @@
     });
 
     drawFrequency = function(data){
-      
+
       $('#frequency_releases').highcharts('StockChart', {
         rangeSelector : {
           selected : 1,
@@ -122,7 +117,6 @@
                           "<td>"+release.diff.additions+"</td>"+
                           "<td>"+release.diff.deletions+"</td>"+
                           "<td>"+release.diff.size+"</td>"+
-                          "<td>"+(release.team?release.team.amount:"none")+"</td>"+
                           "<td>"+(release.diff.percentile_95?moment.duration(release.diff.percentile_95).humanize():"none")+"</td>"+
                           "<td>"+moment.duration(release.diff.miliseconds).humanize();+"</td>"+
                           "</tr>";
@@ -187,7 +181,7 @@
 
     }
 
-    drawLineReleases = function(categories,meanSeriesData,percentile95SeriesData,meanSeriesTeamData,percentile95SeriesTeamData){
+    drawLineReleases = function(categories,meanSeriesData,percentile95SeriesData){
 
       var configuration = {
         title: {
@@ -217,7 +211,7 @@
             var tooltipMarkup = pointsLength ? '<span style="font-size: 10px">' + points[0].key + '</span><br/>' : '';
 
             for(var index = 0; index < pointsLength; index += 1) {
-              tooltipMarkup += '<span style="color:' + points[index].series.color + '">\u25CF</span> ' + points[index].series.name + ': <b>' + 
+              tooltipMarkup += '<span style="color:' + points[index].series.color + '">\u25CF</span> ' + points[index].series.name + ': <b>' +
               moment.duration(points[index].y,'minutes').humanize()  + '</b><br/>';
             }
 
@@ -232,14 +226,6 @@
           {
             data:percentile95SeriesData,
             name:"Percentile 95%"
-          },
-          {
-            data:meanSeriesTeamData,
-            name:"Team Mean"
-          },
-          {
-            data:percentile95SeriesTeamData,
-            name:"Team Percentile 95%"
           }
         ]
       };

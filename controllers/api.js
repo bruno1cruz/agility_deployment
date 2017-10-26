@@ -225,40 +225,6 @@ module.exports = function(app){
 				})
 
 			}
-
-		},
-		team:{
-			post: function(req,res){
-				var team = new app.models.Team(req.body);
-				team.application = req.params.app_name;
-
-				app.models.Application.findOne({name: team.application},{_id:false }).then(function(application){
-
-					if (!application) {
-						errorHandler(`Application ${req.params.app_name} not found`, res, 404);
-						return;
-					}
-
-					team.save(function(err,team){
-
-						if (err){
-							errorHandler("Error when saving to MongoDB",err,400);
-							res.status(400);
-							res.end();
-							return;
-						}
-						logger.info(`Application ${team.application} with ${team.amount} Team members`)
-
-						app.models.Release.sync(team);
-
-						res.status(204);
-						res.end();
-					})
-
-
-				});
-
-			}
 		}
 	}
 
