@@ -224,6 +224,14 @@ module.exports = function(app){
 					res.json(apps);
 				})
 
+			},
+			delete: function(req, res) {
+				app.models.Application.find({name: req.params.app_name}).
+					remove().exec(() => {
+						logger.info(`Application ${req.params.app_name} removed`)
+						res.status(204);
+						res.end();
+					});
 			}
 		}
 	}

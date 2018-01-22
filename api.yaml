@@ -42,7 +42,17 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Application'
-
+  /apps/{app_name}:
+      delete:
+          summary: remove an application "app_name"
+          parameters:
+            - name: app_name
+              in: path
+              required: true
+              type: string
+          responses:
+            "204":
+              description: application
   /apps/{app_name}/issues:
     put:
       summary: change issue patterns from an application
