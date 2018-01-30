@@ -1,5 +1,6 @@
 
 var GitRepo = require("../GitRepo.js");
+var _ = require("lodash");
 var logger = require("../logger/logger.js");
 var Promise = require("promise");
 var moment = require("moment");
@@ -9,29 +10,35 @@ module.exports = function(app){
 	return {
 		release:{
 			post: function(req,res){
-
 				var body = req.body;
+				var releaseBody = _.pick(body,['release']);
 
-				var release = new app.models.Release();
+				var release = new app.models.Release(_.get(releaseBody, 'release'));
 
-				release.application = req.params.app_name;
-				release.environment = body.environment;
-				release.reference = body.reference;
-				release.name = body.name;
-
-				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
+				app.models.Application.findOne({name:req.params.app_name},{_id:false }).then(function(application){
 					if (!application) {
-						errorHandler(`Application ${release.application} not found`, res, 404);
-						return;
+						var appBody = _.pick(body,['application']);
+						var application = new app.models.Application(_.get(appBody, 'application'));
+
+						logger.info(`Application ${application.name} not found, creating it...`);
+						application.save(function(err,application){
+							if (err){
+								errorHandler("Error when saving to MongoDB",err,400);
+								res.status(400);
+								res.end();
+								return;
+							}
+							logger.info(`Application ${application.name} created sucessfully!`)
+							res.location("/apps/" + application.name);
+						});
 					}
-					app.models.Release.findOne({name:release.name , application: release.application}).limit(1).then(function(targetRelease){
+					app.models.Release.findOne({name:release.name , application: application.name}).limit(1).then(function(targetRelease){
 						if (targetRelease) {
 							logger.info(`Release ${release.name} already exist!`)
 							res.status(200);
 							res.json(targetRelease)
 							return;
 						}else{
-
 							application.lastRelease().then(function(lastRelease){
 								release.compare = lastRelease;
 
@@ -204,7 +211,8 @@ module.exports = function(app){
 			post: function(req,res){
 
 				var body = req.body;
-				var application = new app.models.Application(body);
+				var appBody = _.pick(body,['application']);
+				var application = new app.models.Application(_.get(appBody, 'application'));
 
 				application.save(function(err,app){
 					if (err){
