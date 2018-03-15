@@ -5,8 +5,8 @@ var logger = require("../logger/logger.js");
 
 module.exports = function(app) {
 
-    var Schema = require('mongoose').Schema;
-    var db = app.database.connection;
+    var mongoose = require('mongoose');
+    var Schema = mongoose.Schema;
 
     var commit = Schema({
         hash:    {type: String},
@@ -151,5 +151,5 @@ module.exports = function(app) {
         return issues;
     }
 
-    return db.model('release', release);
+    return mongoose.model('release', release);
 };
