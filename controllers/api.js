@@ -22,7 +22,7 @@ module.exports = function(app){
 				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
 					if (!application) {
 						errorHandler(`Application ${release.application} not found`, res, 404);
-						return;
+						return;	
 					}
 					app.models.Release.findOne({name:release.name , application: release.application}).limit(1).then(function(targetRelease){
 						if (targetRelease) {
@@ -224,6 +224,15 @@ module.exports = function(app){
 					res.json(apps);
 				})
 
+			}
+		},
+		commits:{
+			get: function(req,res){
+				var date = req.query.date;
+				var app_name = req.params.app_name;
+				app.models.Commit.find({application: app_name, created: date}).then(function(commits){
+					res.json(commits);
+				})
 			}
 		}
 	}
