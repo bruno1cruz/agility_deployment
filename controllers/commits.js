@@ -39,9 +39,11 @@ module.exports = function (app) {
 					webhook.commits = commits;
 					// webhook._application = release.application;
 
-					commit.commits = commits
+					webhook.commits = commits
 					webhook.save().then(function (commit) {
-						res.status(201).json(commit);
+						res
+							.status(201)
+							.json(webhook);
 					}, err => app.handlers.error.errorHandler(err, res));
 				})
 				.catch(err => app.handlers.error.errorHandler(err, res))
