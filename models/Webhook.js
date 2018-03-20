@@ -1,3 +1,5 @@
+var moment = require("moment");
+
 module.exports = function(app){
 
     var mongoose = require('mongoose');
@@ -12,21 +14,14 @@ module.exports = function(app){
         diff:{
             additions: {type: Number},
             deletions: {type: Number},
-            miliseconds: {type: Number}
+            size: {type:Number}
         }
     });
 
 
     var webhook = Schema({
         name:        {type: String},
-        compare:     {type: String},
         created:     {type:Date,default:Date.now},
-        reference:     {
-            created: {type: Date},
-            started: {type: Date},
-            type:    {type:String}
-        },
-        environment: {type: String},
         application: {type: String},
         commits:     {type: [commit]},
         issues:      {type: [String]},
@@ -47,6 +42,26 @@ module.exports = function(app){
         self.issues = self.extractIssue(self.commits)
         next();
     })
+
+    webhook.pre('save', function (next) {
+        var differences = [];
+        var additions = 0;
+        var deletions = 0;
+
+        for (var i = 0; i < this.commits.length; i++) {
+            if (!this.commits[i].error) {
+                additions += this.commits[i].diff.additions;
+                deletions += this.commits[i].diff.deletions;
+            }
+        }
+
+        this.diff = {
+            deletions: deletions,
+            additions: additions,
+            size: this.commits.length
+        };
+        next();
+    });
 
     webhook.methods.extractIssue = function(commits){
         const regex = /\[\s*([\w]*)\s*-\s*([\d]*).*\s*\]/g
