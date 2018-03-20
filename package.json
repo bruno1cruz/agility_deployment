@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "debug":"CLIENT_ID=DJCc2KxPGP29AhT7kX CLIENT_SECRET=k9FuueaKK6FQjn2BdwtAxvSAvxfnCTcr REFRESH_TOKEN=E2WhLx4uKFahBZ2xbL nodemon index.js",
+    "start": "npm start"
   },
   "repository": {
     "type": "git",

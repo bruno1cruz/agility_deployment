@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.database= { connection : mongoose.connect(process.env.MONGODB) };
 
-load("models").then("controllers").then('routes').into(app);
+load("models").then('handlers').then("controllers").then('routes').into(app);
 
 app.listen(7000, function(){
 	console.info("=== >> Agility Deployment is up and running");
