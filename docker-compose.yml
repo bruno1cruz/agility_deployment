@@ -11,9 +11,9 @@ services:
     build: image: bruno1cruz/agility_deployment:latest
     container_name: agility
     environment:
-      CLIENT_ID:
-      CLIENT_SECRET:
-      REFRESH_TOKEN:
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
       MONGODB: mongodb://mongodb/agility
     links:
       - mongodb

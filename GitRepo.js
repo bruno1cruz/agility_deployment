@@ -9,7 +9,7 @@ var logger = require('./logger/logger.js');
 const REPOSITORY_URI = "https://api.bitbucket.org/2.0/repositories/%s/%s/";
 const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s&pagelen=100"
 const REPOSITORY_DIFF_URI = REPOSITORY_URI + "diff/%s"
-
+	
 function GitRepo(repositoryOwner, repositoryName){
 
 	this.repositoryOwner = repositoryOwner;
@@ -76,13 +76,11 @@ var resolveCommits = function(uri, that, commitArray) {
 }
 
 GitRepo.prototype._request = function(uri){
-
 	var promise_token = this.token();
 
 	return new Promise(function(resolve,reject){
-
 		promise_token.then(function(token){
-
+		
 			logger.info(`URI: ${uri}`);
 
 			request({
@@ -91,7 +89,6 @@ GitRepo.prototype._request = function(uri){
 					"Authorization":"Bearer " + token
 				}
 			},function(error, response, body){
-
 				if (error) {
 					reject(error);
 				} else if(response.statusCode == 200){
@@ -100,10 +97,18 @@ GitRepo.prototype._request = function(uri){
 					resolve(new Error("status code "+ response.statusCode))
 				}
 			});
-
 		}, reject);
 	});
 
+}
+
+GitRepo.prototype.webhook_diff = function(uri_diff){
+	
+	logger.info(`URI DIFF ${uri_diff}`);
+
+	const that = this;	
+	return that._request(uri_diff);
+	
 }
 
 GitRepo.prototype.withDiff = function(commits){
@@ -117,7 +122,7 @@ GitRepo.prototype.withDiff = function(commits){
 		var diffPromises = [];
 
 		for (var i = 0; i < commits.length; i++) {
-
+		
 			var uri = util.format(REPOSITORY_DIFF_URI,that.repositoryOwner,that.repositoryName,commits[i].hash);
 			diffPromises.push(that._request(uri));
 		}
@@ -134,7 +139,6 @@ GitRepo.prototype.withDiff = function(commits){
 			}
 			resolve(commits);
 		})
-
 	});
 }
 

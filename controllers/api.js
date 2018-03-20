@@ -22,7 +22,7 @@ module.exports = function(app){
 				app.models.Application.findOne({name:release.application},{_id:false }).then(function(application){
 					if (!application) {
 						errorHandler(`Application ${release.application} not found`, res, 404);
-						return;	
+						return;
 					}
 					app.models.Release.findOne({name:release.name , application: release.application}).limit(1).then(function(targetRelease){
 						if (targetRelease) {
@@ -37,7 +37,7 @@ module.exports = function(app){
 
 								var gitRepo = new GitRepo( application.repository.owner ,application.repository.name);
 
-								gitRepo.commits(release.name, release.compare).then(commits=>gitRepo.withDiff(commits)).then(function(commits){
+								gitRepo.commits(release.name, release.compare).then(commits=>gitRepo.withDiff(commits)).then(commits=>{
 
 									release.commits = commits;
 									release._application = application;
@@ -233,6 +233,23 @@ module.exports = function(app){
 				app.models.Commit.find({application: app_name, created: date}).then(function(commits){
 					res.json(commits);
 				})
+			},
+			post: function (req,res){
+
+				const body = req.body;
+
+				var commit = new app.models.Commit();
+				const new_hash = body.push.changes[0].new.target.hash
+				const old_hash = body.push.changes[0].old.target.hash
+
+
+				const repository = {name:body.repository.name,owner:body.repository.owner.username}
+				var gitRepo = new GitRepo( repository.owner ,repository.name);
+				gitRepo.commits(new_hash,old_hash).then(commits=>gitRepo.withDiff(commits)).then(commit=>{
+					console.log(commit)
+					res.status(810).json(commit)
+				})
+		
 			}
 		}
 	}
@@ -240,6 +257,7 @@ module.exports = function(app){
 }
 
 function errorHandler(err, response, statusCode){
+	logger.info(statusCode)
 	statusCode = statusCode || 500;
 	response.status(statusCode);
 	var message = err instanceof Error ? err.message : err
