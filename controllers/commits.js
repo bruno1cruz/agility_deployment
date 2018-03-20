@@ -20,7 +20,7 @@ module.exports = function (app) {
 
 			webhook.application = body.repository.name;
 			webhook.reference = body.reference;
-			webhook.name = body.name;
+			webhook.name = body.repository.name;;
 
 			const commit_hash = {
 				'new': body.push.changes[0].new.target.hash,

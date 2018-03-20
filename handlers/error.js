@@ -9,5 +9,5 @@ module.exports.errorHandler = function(err, response, statusCode) {
 	response.status(statusCode);
 	var message = err instanceof Error ? err.message : err
 	logger.error(`${message}`, { stacktrace: err, statusCode: statusCode });
-	response.json({"code":500,"message": message });
+	response.json({"message": message });
 }
