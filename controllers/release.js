@@ -16,7 +16,7 @@ module.exports = function (app) {
 
             app.models.Application.findOne({ name: release.application }, { _id: false }).then(function (application) {
                 if (!application) {
-                    errorHandler(`Application ${release.application} not found`, res, 404);
+                    app.handlers.error.errorHandler(`Application ${release.application} not found`, res, 404);
                     return;
                 }
                 app.models.Release.findOne({ name: release.name, application: release.application }).limit(1).then(function (targetRelease) {
@@ -39,15 +39,15 @@ module.exports = function (app) {
                                 release.save().then(function (release) {
                                     res.status(201);
                                     res.json(release);
-                                }, err => errorHandler(err, res));
+                                }, err => app.handlers.error.errorHandler(err, res));
 
-                            }, err => errorHandler(err, res));
-                        }, err => errorHandler(err, res));
+                            }, err => app.handlers.error.errorHandler(err, res));
+                        }, err => app.handlers.error.errorHandler(err, res));
                     }
 
-                }, err => errorHandler(err, res));
+                }, err => app.handlers.error.errorHandler(err, res));
 
-            }).catch(err => errorHandler(err, res));
+            }).catch(err => app.handlers.error.errorHandler(err, res));
 
         },
         get: function (req, res) {
@@ -59,7 +59,7 @@ module.exports = function (app) {
                 if (release) {
                     res.json(release);
                 } else {
-                    errorHandler("release não foi encontrada", res, 404);
+                    app.handlers.error.errorHandler("release não foi encontrada", res, 404);
                     return;
                 }
             });
@@ -72,12 +72,12 @@ module.exports = function (app) {
             let releaseName = req.params.name;
             app.models.Application.findOne({ name: applicationName }, { _id: false }).then(function (application) {
                 if (!application) {
-                    errorHandler(`Application ${applicationName} not found`, res, 404);
+                    app.handlers.error.errorHandler(`Application ${applicationName} not found`, res, 404);
                     return;
                 }
                 app.models.Release.findOne({ name: releaseName, application: applicationName }).limit(1).then(function (release) {
                     if (!release) {
-                        errorHandler(`Release ${releaseName} not found`, res, 404);
+                        app.handlers.error.errorHandler(`Release ${releaseName} not found`, res, 404);
                         return;
                     }
                     application.lastRelease().then(function (lastReleaseName) {
@@ -86,7 +86,7 @@ module.exports = function (app) {
                             app.models.Release.remove({ name: release.name }).then(function () {
                                 res.status(204);
                                 res.end();
-                            }).catch(err => errorHandler(err, res));
+                            }).catch(err => app.handlers.error.errorHandler(err, res));
                         } else {
 
                             application.afterRelease(release).then(function (afterRelease) {
@@ -104,18 +104,18 @@ module.exports = function (app) {
                                         app.models.Release.remove({ name: release.name }).then(function () {
                                             res.status(204);
                                             res.end();
-                                        }).catch(err => errorHandler(err, res));
-                                    }, err => errorHandler(err, res));
+                                        }).catch(err => app.handlers.error.errorHandler(err, res));
+                                    }, err => app.handlers.error.errorHandler(err, res));
 
-                                }, err => errorHandler(err, res));
+                                }, err => app.handlers.error.errorHandler(err, res));
 
-                            }, err => errorHandler(err, res));
+                            }, err => app.handlers.error.errorHandler(err, res));
 
                         }
-                    }, err => errorHandler(err, res));
-                }, err => errorHandler(err, res));
+                    }, err => app.handlers.error.errorHandler(err, res));
+                }, err => app.handlers.error.errorHandler(err, res));
 
-            }).catch(err => errorHandler(err, res));
+            }).catch(err => app.handlers.error.errorHandler(err, res));
         }
     }
 }

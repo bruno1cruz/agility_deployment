@@ -10,7 +10,7 @@ module.exports = function (app) {
 
 			application.save(function (err, app) {
 				if (err) {
-					errorHandler(err, res, 400);
+					app.handlers.error.errorHandler(err, res, 400);
 					return;
 				}
 				logger.info(`Application ${app.name} created`)

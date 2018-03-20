@@ -19,7 +19,7 @@ module.exports = function (app) {
                     query.created = { $gte: createdDateSince, $lt: createdDateUntil };
 
                 } else {
-                    errorHandler("data invalida", res, 400);
+                    app.handlers.error.errorHandler("data invalida", res, 400);
                     return;
                 }
             }

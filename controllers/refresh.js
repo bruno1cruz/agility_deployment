@@ -8,7 +8,7 @@ module.exports = function (app) {
             app.models.Application.findOne({ name: req.params.app_name }, { _id: false }).then(function (application) {
 
                 if (!application) {
-                    errorHandler(`Application ${req.params.app_name} not found`, res, 404);
+                    app.handlers.error.errorHandler(`Application ${req.params.app_name} not found`, res, 404);
                     return;
                 }
 
@@ -23,7 +23,7 @@ module.exports = function (app) {
                 res.status(202);
                 res.end();
 
-            }).catch(err => errorHandler(err, res));
+            }).catch(err => app.handlers.error.errorHandler(err, res));
 
         }
     }

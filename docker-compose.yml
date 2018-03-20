@@ -8,7 +8,7 @@ services:
       - "9000:27017"
 
   agility:
-    build: image: bruno1cruz/agility_deployment:latest
+    build: ./
     container_name: agility
     environment:
       CLIENT_ID: ${CLIENT_ID}

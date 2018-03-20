@@ -3,7 +3,7 @@ module.exports = function (app) {
         put: function (req, res) {
 
             if (!req.body || !req.body.patterns) {
-                errorHandler("pattern list expected", res, 400);
+                app.handlers.error.errorHandler("pattern list expected", res, 400);
                 return;
             }
 
