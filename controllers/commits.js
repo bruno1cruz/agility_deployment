@@ -38,8 +38,7 @@ module.exports = function (app) {
 
 					webhook.commits = commits;
 					// webhook._application = release.application;
-
-					webhook.commits = commits
+					webhook.commits = commits	
 					webhook.save().then(function (commit) {
 						res
 							.status(201)
