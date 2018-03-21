@@ -13,6 +13,6 @@ module.exports = function (app) {
 	app.delete("/api/apps/:app_name/releases/: name", app.controllers.release.delete);
 	app.get("/api/apps/:app_name/releases/:name", app.controllers.release.get);
 
-	app.get("/api/apps/:app_name/commits", app.controllers.commits.get);
-	app.post("/api/apps/commits", app.controllers.commits.post);
+	app.get("/api/apps/:app_name/commits", app.controllers.webhook.get);
+	app.post("/api/apps/commits", app.controllers.webhook.post);
 };
