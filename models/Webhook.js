@@ -78,6 +78,7 @@ module.exports = function (app) {
 
     webhook.pre('save', function (next) {
         const self = this;
+        console.log(self)
         self.issues = self.extractIssue(self.commits)
         next();
     })
