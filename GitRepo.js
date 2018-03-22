@@ -7,7 +7,7 @@ var logger = require('./logger/logger.js');
 
 const REPOSITORY_URI = "https://api.bitbucket.org/2.0/repositories/%s/%s/";
 const REPOSITORY_COMMITS_URI = REPOSITORY_URI + "commits/%s?exclude=%s&pagelen=100"
-const REPOSITORY_COMMITS_BRANCH_URI = REPOSITORY_URI + "commits/%s"
+const REPOSITORY_COMMITS_BRANCH_URI = REPOSITORY_URI + "commits/%s?exclude=master&pagelen=100"
 const REPOSITORY_DIFF_URI = REPOSITORY_URI + "diff/%s"
 
 function GitRepo(repositoryOwner, repositoryName) {
@@ -104,10 +104,8 @@ GitRepo.prototype._request = function (uri) {
 
 GitRepo.prototype.getCommitFromBranch = function (branch_name) {
 
-	logger.info("Branch Name:", branch_name)
 	const self = this;
 	const uri = util.format(REPOSITORY_COMMITS_BRANCH_URI, self.repositoryOwner, self.repositoryName, branch_name);
-
 
 	return new Promise(function (resolve, reject) {
 		const response = [self._request(uri)];
@@ -117,7 +115,10 @@ GitRepo.prototype.getCommitFromBranch = function (branch_name) {
 			.then(function (branch_response) {
 				const parsed_response = JSON.parse(branch_response).values
 				for (var i = 0; i < parsed_response.length; i++) {
-					commits.push({'hash':parsed_response[i].hash,'message':parsed_response[i].message})
+						commits.push({
+							'hash': parsed_response[i].hash,
+							'message': parsed_response[i].message
+						})
 				}
 				resolve(commits);
 			})

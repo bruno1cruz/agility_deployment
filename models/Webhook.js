@@ -78,8 +78,24 @@ module.exports = function (app) {
 
     webhook.pre('save', function (next) {
         const self = this;
-        console.log(self)
         self.issues = self.extractIssue(self.commits)
+        next();
+    })
+
+    webhook.pre('save', function (next) {
+        const self = this;
+
+        var obj = {};
+
+        for (var i = 0; i < this.commits.length; i++)
+            obj[this.commits[i].hash] = this.commits[i];
+
+        this.commits = new Array();
+        for (var key in obj)
+            this.commits.push(obj[key]);
+
+        console.log(this.commits)
+
         next();
     })
 
@@ -117,6 +133,8 @@ module.exports = function (app) {
         }
         return issues;
     }
+
+
 
     return mongoose.model('webhook', webhook);
 };

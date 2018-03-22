@@ -9,87 +9,85 @@ module.exports = function (app) {
 			var app_name = req.params.app_name;
 			app.models.Webhook.find({
 				application: app_name,
-				created: {
-					$gte: new Date(date)
-				}
+				created: new Date(date)
 			}).then(function (commits) {
 				res.json(commits);
 			})
 		},
-		post: function (req, res) {
-				const body = req.body;
-				const application_name = body.repository.full_name.split("/").reverse()[0]
-
-				const webhook = new app.models.Webhook();
+		post: async function (req, res) {
+			const body = req.body;
+			const application_name = body.repository.full_name.split("/").reverse()[0]
+			const webhook = new app.models.Webhook();
+			const repository = {
+				name: application_name,
+				owner: body.repository.owner.username
+			}
+			const response = [];
+			var branch_name
+			var change
+			for (var i = 0; i < body.push.changes.length; i++) {
 				webhook.application = application_name;
 				webhook.name = application_name;
+				
+				change = body.push.changes[i];
 
-				const repository = {
-					name: application_name,
-					owner: body.repository.owner.username
+				if (change.old == null && change.new == null) {
+					response.push({
+						"code": 404,
+						"message": "Without informations.",
+						"change_request": change
+					})
+					continue;
 				}
 
-				const response = [{}];
-				var branch_name
-				var change
-				for (var i = 0; i < body.push.changes.length; i++) {
-					change = body.push.changes[i];
+				branch_name = change.new.name
 
-					if (change.old == null && change.new == null) {
-						response.push({
-							"code": 404,
-							"message": "Without informations.",
-							"change_request": change
-						})
-						continue;
-					}
+				var gitRepo = new GitRepo(repository.owner, repository.name);
 
-					branch_name = change.new.name
-
-					var gitRepo = new GitRepo(repository.owner, repository.name);
-
-					if (!change.old) {
-						gitRepo
-							.getCommitFromBranch(branch_name)
-							.then(commits => gitRepo.withDiff(commits))
-							.then(commits => {
-								webhook.commits = commits;
-								webhook.save().then(function (commit) {
-									response.push({
-										"code": 201,
-										"commits": webhook.commits,
-										"message": "Commits created with success.",
-									})
-								}, err => app.handlers.error.errorHandler(err, res));
-							})
-							.catch(err => app.handlers.error.errorHandler(err, res))
-						continue;
-					}
-
-					const commit_hash = {
-						'new': change.new.target.hash,
-						'old': change.old ? change.old.target.hash : null
-					}
-
-					logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
-
-					gitRepo
-						.commits(commit_hash.new, commit_hash.old)
+				if (!change.old) {
+					console.time("Inicio " + i)
+					await gitRepo
+						.getCommitFromBranch(branch_name)
 						.then(commits => gitRepo.withDiff(commits))
-						.then(commits => {
-							webhook.commits = commits;
-							webhook.save().then(function (commit) {
-								response.push({
-									"code": 201,
-									"commits": webhook.commits,
-									"message": "Commits created with success.",
-								})
-							}, err => app.handlers.error.errorHandler(err, res));
-						}).catch(err => app.handlers.error.errorHandler(err, res))
-				}	
+						.then(commits => commits.forEach((a,b,c)=>webhook.commits.push(a)))
+						.catch(err => app.handlers.error.errorHandler(err, res))
+					console.timeEnd("Inicio " + i)
+					continue;
+				}
+
+				const commit_hash = {
+					'new': change.new.target.hash,
+					'old': change.old.target.hash
+				}
+
+				logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
+
+				await gitRepo
+					.commits(commit_hash.new, commit_hash.old)
+					.then(commits => gitRepo.withDiff(commits))
+					.then(commits => {
+						webhook.commits = commits;
+						webhook.save().then(function (commit) {
+							response.push({
+								"code": 201,
+								"commits": webhook.commits,
+								"message": "Commits created with success.",
+							})
+						}, err => app.handlers.error.errorHandler(err, res));
+					}).catch(err => app.handlers.error.errorHandler(err, res))
+			}
+
+			webhook.save().then(function (commit) {
 				res.status(201).json({
-					"message":"Created"
-			})
+					// "response": response,
+					"message": "Created"
+				})
+				// response.push({
+				// 	"code": 201,
+				// 	"message": "Commits created with success.",
+				// })
+			}, err => app.handlers.error.errorHandler(err, res));
+			
 		}
 	}
 }
