@@ -4,11 +4,11 @@ var Promise = require('promise');
 
 module.exports = function (app) {
 	return {
-		get: function (req, res) {
+		get: async function (req, res) {
 			var date = req.query.date || new Date().toDateString();
 			var app_name = req.params.app_name;
 
-			app.models.Application.find({
+			await app.models.Application.find({
 				name: app_name
 			}).then(function (application){
 				app_name = application.repository.name
@@ -18,7 +18,7 @@ module.exports = function (app) {
 			var end_date = new Date(date);
 			end_date.setDate(end_date.getDate()+1);
 
-			app.models.Webhook.find({
+			await  app.models.Webhook.find({
 				application: app_name,
 				created: {
 					$gte: start_date,
