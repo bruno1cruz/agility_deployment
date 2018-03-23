@@ -7,9 +7,23 @@ module.exports = function (app) {
 		get: function (req, res) {
 			var date = req.query.date || new Date().toDateString();
 			var app_name = req.params.app_name;
+
+			app.models.Application.find({
+				name: app_name
+			}).then(function (application){
+				app_name = application.repository.name
+			});
+
+			var start_date = new Date(date);
+			var end_date = new Date(date);
+			end_date.setDate(end_date.getDate()+1);
+
 			app.models.Webhook.find({
 				application: app_name,
-				created: new Date(date)
+				created: {
+					$gte: start_date,
+					$lt: end_date
+				}
 			}).then(function (commits) {
 				res.json(commits);
 			})
@@ -45,13 +59,11 @@ module.exports = function (app) {
 				var gitRepo = new GitRepo(repository.owner, repository.name);
 
 				if (!change.old) {
-					console.time("Inicio " + i)
 					await gitRepo
 						.getCommitFromBranch(branch_name)
 						.then(commits => gitRepo.withDiff(commits))
 						.then(commits => commits.forEach((a,b,c)=>webhook.commits.push(a)))
 						.catch(err => app.handlers.error.errorHandler(err, res))
-					console.timeEnd("Inicio " + i)
 					continue;
 				}
 
@@ -60,7 +72,7 @@ module.exports = function (app) {
 					'old': change.old.target.hash
 				}
 
-				logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
+				// logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
 
 				await gitRepo
 					.commits(commit_hash.new, commit_hash.old)
