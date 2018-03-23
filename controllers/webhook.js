@@ -72,7 +72,7 @@ module.exports = function (app) {
 					'old': change.old.target.hash
 				}
 
-				logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
+				// logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
 
 				await gitRepo
 					.commits(commit_hash.new, commit_hash.old)
