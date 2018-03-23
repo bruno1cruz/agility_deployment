@@ -72,32 +72,20 @@ module.exports = function (app) {
 					'old': change.old.target.hash
 				}
 
-				// logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
+				logger.info("Range Commit Hash:", commit_hash.new + ".." + commit_hash.old)
 
 				await gitRepo
 					.commits(commit_hash.new, commit_hash.old)
 					.then(commits => gitRepo.withDiff(commits))
-					.then(commits => {
-						webhook.commits = commits;
-						webhook.save().then(function (commit) {
-							response.push({
-								"code": 201,
-								"commits": webhook.commits,
-								"message": "Commits created with success.",
-							})
-						}, err => app.handlers.error.errorHandler(err, res));
-					}).catch(err => app.handlers.error.errorHandler(err, res))
+					.then(commits => commits.forEach((a,b,c)=>webhook.commits.push(a)))
+					.catch(err => app.handlers.error.errorHandler(err, res))
 			}
 
 			webhook.save().then(function (commit) {
 				res.status(201).json({
-					// "response": response,
+					"response": response,
 					"message": "Created"
 				})
-				// response.push({
-				// 	"code": 201,
-				// 	"message": "Commits created with success.",
-				// })
 			}, err => app.handlers.error.errorHandler(err, res));
 			
 		}
