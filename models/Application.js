@@ -2,7 +2,8 @@ var Promise = require('promise');
 
 module.exports = function(app) {
 
-    var Schema = require('mongoose').Schema;
+    var mongoose = require('mongoose');
+    var Schema = mongoose.Schema;
     var db = app.database.connection;
 
     var application = Schema({
@@ -78,5 +79,5 @@ module.exports = function(app) {
         return app.models.Release.find({application:this.name, created:{$gt:release.created}}).sort({_id:1}).limit(1);
     }
 
-    return db.model('application', application);
+    return mongoose.model('application', application);
 };

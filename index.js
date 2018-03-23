@@ -9,7 +9,7 @@ app.use(require('cors')());
 
 // app.use(express.static(__dirname + '/public', 3600000));
 app.use(express.static(__dirname + '/bower_components'));
-app.use("/api",express.static(__dirname + '/api.yaml'));
+app.use("/api", express.static(__dirname + '/api.yaml'));
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -17,12 +17,20 @@ app.set('view engine', 'ejs');
 mongoose.Promise = require('promise');
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
 
-app.database= { connection : mongoose.connect(process.env.MONGODB) };
+app.database = {
+	connection: mongoose.connect(process.env.MONGODB)
+};
 
-load("models").then("controllers").then('routes').into(app);
+load("models")
+	.then('handlers')
+	.then("controllers")
+	.then('routes')
+	.into(app);
 
-app.listen(7000, function(){
+app.listen(7000, function () {
 	console.info("=== >> Agility Deployment is up and running");
 });
