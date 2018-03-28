@@ -6,7 +6,7 @@
 
 Use http://editor.swagger.io
 
-[API documentation\](api.yaml)
+[API documentation](api.yaml)
 
 ### What i need?
 
@@ -52,7 +52,7 @@ After creation save both key and secret
 
   
 
-Go to https://bitbucket.org/site/oauth2/authorize?response\_type=code&client\_id={key from oauth}
+Go to https://bitbucket.org/site/oauth2/authorize?response_type=code&client_id={key from oauth}
 
   
 
@@ -70,13 +70,13 @@ Encode your key and secret with base64 {key}:{secret}
 
 ```
 
-curl -v POST https://bitbucket.org/site/oauth2/access\_token -H'Authorization: Basic {key\_and\_scret\_base64\_encoded}' -d'grant\_type=authorization\_code' -d'code={code\_from_authorization}'
+curl -v POST https://bitbucket.org/site/oauth2/access_token -H'Authorization: Basic {key_and_scret_base64_encoded}' -d'grant_type=authorization_code' -d'code={code_from_authorization}'
 
 ```
 
   
 
-\### Refresh Access Code
+### Refresh Access Code
 
   
 
@@ -84,7 +84,7 @@ When you genenerate the access token you also get the refresh code. Save it so y
 
 ```
 
-curl -X POST -H'Authorization: Basic {key\_and\_scret\_base64\_encoded}' https://bitbucket.org/site/oauth2/access\_token -d grant\_type=refresh\_token -d refresh\_token={refresh_token}
+curl -X POST -H'Authorization: Basic {key\_and\_scret\_base64\_encoded}' https://bitbucket.org/site/oauth2/access_token -d grant_type=refresh_token -d refresh_token={refresh_token}
 
 ```
 

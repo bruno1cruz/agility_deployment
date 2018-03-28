@@ -4,15 +4,17 @@ var Promise = require('promise');
 
 module.exports = function (app) {
 	return {
-		get: function (req, res) {
+		get: async function (req, res) {
 			var date = req.query.date || new Date().toDateString();
 			var app_name = req.params.app_name;
 
-			app.models.Application.find({
+			console.log(app_name)
+
+			await app.models.Application.findOne({
 				name: app_name
 			}).then(function (application){
 				app_name = application.repository.name
-			});
+			}).catch(err => res.status(404).json([]));
 
 			var start_date = new Date(date);
 			var end_date = new Date(date);
