@@ -27,7 +27,7 @@ module.exports = function (app) {
 					$lt: end_date
 				}
 			}).then(function (commits) {
-				res.json(commits);
+				res.json(removeDuplicatedCommits(commits));
 			})
 		},
 		post: async function (req, res) {
@@ -42,6 +42,7 @@ module.exports = function (app) {
 			var branch_name
 			var change
 			for (var i = 0; i < body.push.changes.length; i++) {
+				
 				webhook.application = application_name;
 				webhook.name = application_name;
 				
@@ -92,4 +93,31 @@ module.exports = function (app) {
 			
 		}
 	}
+}
+
+function removeDuplicatedCommits(webhooks){
+
+	var commits= {};
+
+	var cleanWebhooks = [];
+
+	for (var i = 0; i < webhooks.length; i++) {
+		
+		var cleanCommits = [];
+		webhooks[i].commits.forEach(function(commit, index, object) {
+			if (!commits[commit.hash]){				
+				cleanCommits.push(commit);
+				commits[commit.hash]=true;
+			}
+
+		});
+
+		if (cleanCommits.length>0) {
+			webhooks[i].commits = cleanCommits;
+			webhooks[i].stats();
+			cleanWebhooks.push(webhooks[i]);
+		}
+	}
+
+	return cleanWebhooks;
 }

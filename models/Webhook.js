@@ -100,22 +100,7 @@ module.exports = function (app) {
     })
 
     webhook.pre('save', function (next) {
-        var differences = [];
-        var additions = 0;
-        var deletions = 0;
-
-        for (var i = 0; i < this.commits.length; i++) {
-            if (!this.commits[i].error) {
-                additions += this.commits[i].diff.additions;
-                deletions += this.commits[i].diff.deletions;
-            }
-        }
-
-        this.diff = {
-            deletions: deletions,
-            additions: additions,
-            size: this.commits.length
-        };
+        this._diff();
         next();
     });
 
@@ -132,6 +117,31 @@ module.exports = function (app) {
             regex.lastIndex = 0
         }
         return issues;
+    }
+
+    webhook.methods.stats = function () {
+        this.issues=this.extractIssue(this.commits);
+        this._diff();
+    }
+
+
+    webhook.methods._diff = function(){
+        var differences = [];
+        var additions = 0;
+        var deletions = 0;
+
+        for (var i = 0; i < this.commits.length; i++) {
+            if (!this.commits[i].error) {
+                additions += this.commits[i].diff.additions;
+                deletions += this.commits[i].diff.deletions;
+            }
+        }
+
+        this.diff = {
+            deletions: deletions,
+            additions: additions,
+            size: this.commits.length
+        };
     }
 
 

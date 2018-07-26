@@ -113,6 +113,7 @@ GitRepo.prototype.getCommitFromBranch = function (branch_name) {
 		Promise
 			.all(response)
 			.then(function (branch_response) {
+
 				const parsed_response = JSON.parse(branch_response).values
 				for (var i = 0; i < parsed_response.length; i++) {
 						commits.push({
